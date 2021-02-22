@@ -9,9 +9,12 @@
  */
 
 const solution = (str, fun, result = '', i = 0) => {
-  return ''
-}
+  const letterPointer = str[i];
+  if (letterPointer === undefined) return result;
+
+  return solution(str, fun, result + fun(letterPointer), i + 1);
+};
 
 module.exports = {
-  solution
-}
+  solution,
+};
