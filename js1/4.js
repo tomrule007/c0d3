@@ -8,9 +8,9 @@
  * @returns null
  */
 
-const solution = (fun, i = 0) => {
-}
+const solution = (fun, i = 0) =>
+  fun(i) !== false ? solution(fun, i + 1) : null;
 
 module.exports = {
-  solution
-}
+  solution,
+};
