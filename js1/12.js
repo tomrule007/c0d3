@@ -10,8 +10,12 @@
  */
 
 const solution = (a, fun) => {
-}
+  setTimeout(() => {
+    const secondTimeout = fun();
+    setTimeout(fun, secondTimeout);
+  }, a);
+};
 
 module.exports = {
-  solution
-}
+  solution,
+};
