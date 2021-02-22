@@ -9,9 +9,13 @@
  */
 
 const solution = (inp, letter, i = 0) => {
-  return true
-}
+  const pointerLetter = inp[i];
+  if (pointerLetter === undefined) return false;
+  if (pointerLetter === letter) return true;
+
+  return solution(inp, letter, i + 1);
+};
 
 module.exports = {
-  solution
-}
+  solution,
+};
