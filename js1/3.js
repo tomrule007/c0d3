@@ -7,10 +7,12 @@
  * @returns {string}
  */
 
-const solution = (num, str, result = '') => {
-  return ''
-}
+const solution = (num, str) => {
+  if (num === 0) return '';
+
+  return str + solution(num - 1, str);
+};
 
 module.exports = {
-  solution
-}
+  solution,
+};
