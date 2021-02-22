@@ -12,9 +12,10 @@
  */
 
 const solution = (num, fun) => {
-  return () => { }
-}
+  let counter = 0;
+  return (x) => (counter++ < num ? fun(x) : null);
+};
 
 module.exports = {
-  solution
-}
+  solution,
+};
