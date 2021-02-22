@@ -8,9 +8,17 @@
  */
 
 const solution = (inp, letter, counter = 0, i = 0) => {
-  return 0
-}
+  const letterPointer = inp[i];
+  if (letterPointer === undefined) return counter;
+
+  return solution(
+    inp,
+    letter,
+    counter + (letterPointer === letter ? 1 : 0),
+    i + 1
+  );
+};
 
 module.exports = {
-  solution
-}
+  solution,
+};
