@@ -18,9 +18,11 @@
  */
 
 const solution = (str, fun) => {
-  return () => { }
-}
+  const { length } = str;
+  let pointer = 0;
+  return () => fun(str[pointer++ % length]);
+};
 
 module.exports = {
-  solution
-}
+  solution,
+};
