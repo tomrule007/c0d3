@@ -9,10 +9,8 @@
  * @returns {array}
  */
 
-const solution = (num) => {
-  return []
-}
+const solution = (num) => new Array(num).fill(null).map((_, i) => i);
 
 module.exports = {
-  solution
-}
+  solution,
+};
