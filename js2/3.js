@@ -10,10 +10,8 @@
  * @returns {array}
  */
 
-const solution = (row, col) => {
-  return []
-}
+const solution = (row, col) => new Array(row).fill(new Array(col).fill(0));
 
 module.exports = {
-  solution
-}
+  solution,
+};
