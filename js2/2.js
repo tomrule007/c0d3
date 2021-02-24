@@ -8,9 +8,12 @@
  * @returns {array}
  */
 
-const solution = (fun, i = 0) =>
-  fun(i) ? [] : [i].concat(solution(fun, i + 1));
+const solution = (fun) => {
+  const solutionHelper = (fun, i = 0) =>
+    fun(i) ? [] : [i, ...solutionHelper(fun, i + 1)];
 
+  return solutionHelper(fun);
+};
 module.exports = {
   solution,
 };
