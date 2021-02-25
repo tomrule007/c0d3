@@ -5,11 +5,18 @@
  */
 
 const solution = () => {
+  const callAllWith = (arr, cb, i = 0) => {
+    if (i >= arr.length) return;
+
+    if (arr[i] !== undefined) cb(arr[i], i, arr);
+
+    callAllWith(arr, cb, i + 1);
+  };
   Array.prototype.cForEach = function (cb) {
-    return 0
-  }
-}
+    callAllWith(this, cb);
+  };
+};
 
 module.exports = {
-  solution
-}
+  solution,
+};
