@@ -10,7 +10,22 @@
  * @returns {array}
  */
 
-const solution = (row, col) => new Array(row).fill(new Array(col).fill(0));
+const solution = (row, col) => {
+  const solutionHelper = (length, i = 0, value = 0) => {
+    if (i >= length) return [];
+
+    // Make shallow copy of value
+    const newValue = Array.isArray(value)
+      ? [...value]
+      : typeof value === '[Object]' && value !== null
+      ? Object.assign({}, value)
+      : value;
+
+    return [newValue, ...solutionHelper(length, i + 1, newValue)];
+  };
+
+  return solutionHelper(row, 0, solutionHelper(col));
+};
 
 module.exports = {
   solution,
