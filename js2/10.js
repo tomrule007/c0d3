@@ -5,11 +5,21 @@
  */
 
 const solution = () => {
-  Array.prototype.cFilter = function () {
-    return 0
-  }
-}
+  const cFilterHelper = (arr, keys, predicate, i = 0) => {
+    if (i >= keys.length) return [];
+    const key = keys[i];
+    const value = arr[key];
+    return predicate(value, Number(key), arr)
+      ? [value, ...cFilterHelper(arr, keys, predicate, i + 1)]
+      : [...cFilterHelper(arr, keys, predicate, i + 1)];
+  };
+
+  Array.prototype.cFilter = function (predicate, thisValue) {
+    const callback = thisValue ? predicate.bind(thisValue) : predicate;
+    return cFilterHelper(this, Object.keys(this), callback);
+  };
+};
 
 module.exports = {
-  solution
-}
+  solution,
+};
