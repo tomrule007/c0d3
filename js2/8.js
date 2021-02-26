@@ -5,11 +5,20 @@
  */
 
 const solution = () => {
-  Array.prototype.cMap = function (cb) {
-    return 0
-  }
-}
+  const cMapHelper = (arr, keys, cb, i = 0) => {
+    if (i >= keys.length) return [];
+    const key = keys[i];
 
+    return [
+      { [key]: cb(arr[key], i, arr) },
+      ...cMapHelper(arr, keys, cb, i + 1),
+    ];
+  };
+
+  Array.prototype.cMap = function (cb) {
+    return Object.assign([], ...cMapHelper(this, Object.keys(this), cb));
+  };
+};
 module.exports = {
-  solution
-}
+  solution,
+};
