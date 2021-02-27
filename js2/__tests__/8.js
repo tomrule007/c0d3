@@ -33,7 +33,7 @@ describe('test gsMap', () => {
     expect(c).toEqual([3, 6, 9])
   })
   describe('Bonus Round', () => {
-    it('should preserve spare values', () => {
+    it('should preserve sparse values', () => {
       const a = [1, , 2, null, 3]
       const c = a.cMap((x) => (x === undefined ? 'undefined' : x))
       expect(c).toEqual(a);
