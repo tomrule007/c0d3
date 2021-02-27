@@ -37,4 +37,13 @@ describe('test cFilter', () => {
     const c = a.cFilter(cb).cFilter(cb)
     expect(c).toEqual([2, 3, 3])
   })
+  describe('Bonus Round', () => {
+    it("callback should bind to optional 'thisValue' if provided", () => {
+      const thisValue = {test:true}
+      const a = [1,2, 3]
+      const c = a.cFilter(function (x) {
+        return this.test},thisValue)
+      expect(c).toEqual(a);
+    })
+  })
 })
