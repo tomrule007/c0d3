@@ -32,4 +32,17 @@ describe('test gsMap', () => {
     const c = a.cMap(cb).cMap(cb)
     expect(c).toEqual([3, 6, 9])
   })
+  describe('Bonus Round', () => {
+    it('should preserve spare values', () => {
+      const a = [1, , 2, null, 3]
+      const c = a.cMap((x) => (x === undefined ? 'undefined' : x))
+      expect(c).toEqual(a);
+    })
+
+    it("should iterate over 'undefined' and 'null' values ", () => {
+      const a = [1, undefined, 2, null, 3]
+      const c = a.cMap((x) => x === undefined ? 'undefined' : x === null ? 'null' : x)
+      expect(c).toEqual([1, 'undefined', 2, 'null', 3])
+    })
+  })
 })
