@@ -8,9 +8,11 @@
 
 const solution = (arr) => {
   return (obj) =>
-    Object.fromEntries(
-      arr.map((key) => (obj.hasOwnProperty(key) ? [key, obj[key]] : []))
-    );
+    arr.reduce((acc, curKey) => {
+      return obj.hasOwnProperty(curKey)
+        ? { ...acc, [curKey]: obj[curKey] }
+        : acc;
+    }, {});
 };
 
 module.exports = {
