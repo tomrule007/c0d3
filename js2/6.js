@@ -7,8 +7,17 @@
  */
 
 const solution = (arr, time) => {
-}
+  const solutionHelper = (arr, i = 0) => {
+    if (i >= arr.length) return;
+    setTimeout(() => {
+      arr[i]();
+      solutionHelper(arr, i + 1);
+    }, time);
+  };
+
+  solutionHelper(arr);
+};
 
 module.exports = {
-  solution
-}
+  solution,
+};
