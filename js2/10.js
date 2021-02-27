@@ -11,7 +11,7 @@ const solution = () => {
     const value = arr[key];
     return predicate(value, Number(key), arr)
       ? [value, ...cFilterHelper(arr, keys, predicate, i + 1)]
-      : [...cFilterHelper(arr, keys, predicate, i + 1)];
+      : cFilterHelper(arr, keys, predicate, i + 1);
   };
 
   Array.prototype.cFilter = function (predicate, thisValue) {
