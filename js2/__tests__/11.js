@@ -31,4 +31,20 @@ describe('test cFind', () => {
     const result = a.cFind((e) => e === 'defgh')
     expect(result + '').toEqual('undefined')
   })
+  describe('Bonus Round', () => {
+    it('index value provided to callback is a number value (not a string)', () => {
+      let index;
+      [9].cFind((e, i, arr) => {
+        index = i
+      })
+      expect(typeof index).toBe("number")
+    })
+    it("callback should bind to optional 'thisValue' if provided", () => {
+      const thisValue = {test:2}
+      const a = [1,2, 3]
+      const c = a.cFind(function (x) {
+        return this.test == x},thisValue)
+      expect(c).toEqual(2)
+    })
+  })
 })
