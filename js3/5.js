@@ -6,8 +6,13 @@
  **/
 
 const solution = (obj1, obj2) => {
-  return {}
-}
+  return Object.fromEntries(
+    Object.entries(obj1).map(([key, value]) => [
+      key,
+      obj2[key] ? obj2[key](value) : value,
+    ])
+  );
+};
 module.exports = {
-  solution
-}
+  solution,
+};
