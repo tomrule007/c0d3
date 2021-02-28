@@ -7,9 +7,17 @@
  */
 
 const solution = (arr, num) => {
-  return true
-}
+  const seenNumbers = new Set();
+
+  return arr.some((value) => {
+    if (seenNumbers.has(num - value)) return true;
+
+    seenNumbers.add(value);
+
+    return false;
+  });
+};
 
 module.exports = {
-  solution
-}
+  solution,
+};
