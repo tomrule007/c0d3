@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MineSweeper</title>
+
+    <style>
+      .window {
+        background-color: #d8d8d8;
+        padding: 3px;
+        width: 200px;
+        border: white outset 1px;
+        box-shadow: 2px 2px 5px black;
+      }
+      .selector {
+        position: absolute;
+        background-color: grey;
+        opacity: 60%;
+        border: solid blue 3px;
+        box-sizing: border-box;
+        visibility: hidden;
+      }
+      .selectable {
+        user-select: none;
+      }
+      div {
+        display: inline-block;
+      }
+      .titlebar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #01008c;
+        padding: 4px;
+      }
+      .menu {
+        display: block;
+        margin-top: 10px;
+      }
+      .game-board {
+        border: white outset 3px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+      }
+
+      .score-board {
+        margin-bottom: 10px;
+        border: white inset 2px;
+        width: 160px;
+        height: 35px;
+      }
+      .game-menu,
+      .help-menu {
+        margin-right: 10px;
+      }
+
+      .title {
+        color: white;
+        font-size: 14px;
+        flex-grow: 1;
+      }
+      .icon {
+        height: 100%;
+      }
+      .win-button {
+        width: 17px;
+        height: 14px;
+        font-size: 12px;
+        background-color: #bfc2c2;
+        text-align: center;
+        margin: 2px;
+        border: white outset 2px;
+      }
+      .game {
+        width: 160px;
+        border: white inset 2px;
+      }
+      .row {
+        display: flex;
+      }
+
+      .cell {
+        width: 18px;
+        height: 18px;
+        box-sizing: border-box;
+        border: white outset 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-weight: bold;
+      }
+      .exposed {
+        border: #9d9d9d dashed 1px;
+      }
+      .depressed {
+        border: white inset 2px;
+      }
+
+      .cell[data-value="1"]::before {
+        content: "1";
+        color: #070c9e;
+      }
+      .cell[data-value='2']::before {
+        content: '2';
+        color: #4d7c4e;
+      }
+      .cell[data-value='3']::before {
+        content: '3';
+        color: #a42721;
+      }
+      .cell[data-value='4']::before {
+        content: '4';
+        color: #281379;
+      }
+      .cell[data-value='5']::before {
+        content: '5';
+        color: #480910;
+      }
+      .cell[data-value='6']::before {
+        content: '6';
+        color: #186b61;
+      }
+      .cell[data-value='7']::before {
+        content: '7';
+        color: #080c0b;
+      }
+      .cell[data-value='8']::before {
+        content: '8';
+        color: #7e7e7e;
+      }
+      
+      .flag {
+        height: 80%;
+      }
+      .cell[data-value='bomb'] {
+        content: url(./mineIcon.png);
+        height: 80%;
+        background-color: #bf1716;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="window">
+      <div class="titlebar">
+        <img class="icon" src="./mineIcon.png" />
+        <div class="title">Minesweeper</div>
+        <div class="minimize win-button">🗕</div>
+        <div class="maximize win-button">🗖</div>
+        <div class="close win-button">⨯</div>
+      </div>
+      <div class="menu">
+        <div class="game-menu"><u>G</u>ame</div>
+        <div class="help-menu"><u>H</u>elp</div>
+      </div>
+      <div class="game-board">
+        <div class="score-board">
+          <div class="bomb-count"></div>
+          <div class="game-status">😊</div>
+          <div class="game-timer"></div>
+        </div>
+        <div class="game">
+          <div class="row">
+            <div class="cell"></div>
+            <div class="cell exposed" data-value="6"></div>
+            <div class="cell exposed" data-value="bomb"></div>
+            <div class="cell"></div>
+            <div class="cell depressed"></div>
+            <div class="cell">
+              <img class="flag" src="./flagicon.png" />
+            </div>
+            <div class="cell"></div>
+            <div class="cell exposed" data-value="7"></div>
+            <div class="cell exposed" data-value="8"></div>
+            <div class="cell"></div>
+          </div>
+          <div class="row">
+            <div class="cell"></div>
+            <div class="cell exposed"></div>
+            <div class="cell exposed"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+          </div>
+          <div class="row">
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell exposed" data-value="4"></div>
+            <div class="cell exposed" data-value="5"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+          </div>
+          <div class="row">
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+          </div>
+          <div class="row">
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell exposed" data-value="1"></div>
+            <div class="cell exposed" data-value="2"></div>
+            <div class="cell exposed" data-value="3"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+          </div>
+          <div class="row">
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+          </div>
+          <div class="row">
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+          </div>
+          <div class="row">
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+          </div>
+          <div class="row">
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+          </div>
+          <div class="row">
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="7.js"></script>
+  </body>
+</html>
