@@ -7,55 +7,79 @@
     <title>MineSweeper</title>
 
     <style>
+      @font-face {
+  font-family: MSSansSerif;
+  src: url(./Microsoft\ Sans\ Serif.ttf);
+}
+body{
+  font-family: MSSansSerif;
+  font-size: small;
+
+}
       .window {
         background-color: #d8d8d8;
         padding: 3px;
-        width: 200px;
+        display:inline-block;
         border: white outset 1px;
         box-shadow: 2px 2px 5px black;
-      }
-      .selector {
-        position: absolute;
-        background-color: grey;
-        opacity: 60%;
-        border: solid blue 3px;
-        box-sizing: border-box;
-        visibility: hidden;
-      }
-      .selectable {
-        user-select: none;
-      }
-      div {
-        display: inline-block;
       }
       .titlebar {
         display: flex;
         justify-content: space-between;
         align-items: center;
         background-color: #01008c;
-        padding: 4px;
+        padding: 2px;
       }
       .menu {
         display: block;
-        margin-top: 10px;
+        margin: 10px 0;
+        
       }
       .game-board {
         border: white outset 3px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 10px;
+        padding: 12px;
       }
 
       .score-board {
-        margin-bottom: 10px;
+        margin-bottom: 12px;
         border: white inset 2px;
-        width: 160px;
-        height: 35px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 2px
+      }
+
+      .game-status {
+        /* TODO: convert to button class to reduce repeated css */
+        width: 33px;
+        height: 33px;
+      
+        box-sizing: border-box;
+        border: white outset 3px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 2px;
+      }
+      .bomb-count,.game-timer {
+        color: #c21519;
+        background-color: #070705;
+        padding: 1px 4px;
+        margin: 2px 2px 1px 2px;
+        font-size:x-large;
+        font-weight: bold;
+       
+        border: black inset 2px;
+
       }
       .game-menu,
       .help-menu {
         margin-right: 10px;
+        display: inline-block;
       }
 
       .title {
@@ -76,7 +100,8 @@
         border: white outset 2px;
       }
       .game {
-        width: 160px;
+        width: 100%;
+        box-sizing: border-box;
         border: white inset 2px;
       }
       .row {
@@ -96,6 +121,7 @@
       }
       .exposed {
         border: #9d9d9d dotted 1px;
+      
       }
       .depressed {
         border: white inset 2px;
@@ -138,8 +164,10 @@
         height: 80%;
       }
       .cell[data-value='bomb'] {
-        content: url(./mineIcon.png);
-        height: 80%;
+        background-image: url(./mineIcon.png);
+        background-size: 90%;
+        background-repeat: no-repeat;
+        background-position: center;
         background-color: #bf1716;
       }
     </style>
@@ -160,9 +188,9 @@
       </div>
       <div class="game-board">
         <div class="score-board">
-          <div class="bomb-count"></div>
-          <div class="game-status">😊</div>
-          <div class="game-timer"></div>
+          <div class="bomb-count">010</div>
+          <div class="game-status"><img class="flag" src="./closeFace.png" /></div>
+          <div class="game-timer">130</div>
         </div>
         <div class="game">
           <div class="row">
