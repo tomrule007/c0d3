@@ -8,18 +8,17 @@
 
     <style>
       @font-face {
-  font-family: MSSansSerif;
-  src: url(./Microsoft\ Sans\ Serif.ttf);
-}
-body{
-  font-family: MSSansSerif;
-  font-size: small;
-
-}
+        font-family: MSSansSerif;
+        src: url(./Microsoft\ Sans\ Serif.ttf);
+      }
+      body {
+        font-family: MSSansSerif;
+        font-size: small;
+      }
       .window {
         background-color: #d8d8d8;
         padding: 3px;
-        display:inline-block;
+        display: inline-block;
         border: white outset 1px;
         box-shadow: 2px 2px 5px black;
       }
@@ -33,7 +32,6 @@ body{
       .menu {
         display: block;
         margin: 10px 0;
-        
       }
       .game-board {
         border: white outset 3px;
@@ -50,14 +48,14 @@ body{
         justify-content: space-between;
         align-items: center;
         width: 100%;
-        padding: 2px
+        padding: 2px;
       }
 
       .game-status {
         /* TODO: convert to button class to reduce repeated css */
         width: 33px;
         height: 33px;
-      
+
         box-sizing: border-box;
         border: white outset 3px;
         display: flex;
@@ -65,16 +63,16 @@ body{
         justify-content: center;
         border-radius: 2px;
       }
-      .bomb-count,.game-timer {
+      .bomb-count,
+      .game-timer {
         color: #c21519;
         background-color: #070705;
         padding: 1px 4px;
         margin: 2px 2px 1px 2px;
-        font-size:x-large;
+        font-size: x-large;
         font-weight: bold;
-       
-        border: black inset 2px;
 
+        border: black inset 2px;
       }
       .game-menu,
       .help-menu {
@@ -121,14 +119,13 @@ body{
       }
       .exposed {
         border: #9d9d9d dotted 1px;
-      
       }
       .depressed {
         border: white inset 2px;
       }
 
-      .cell[data-value="1"]::before {
-        content: "1";
+      .cell[data-value='1']::before {
+        content: '1';
         color: #070c9e;
       }
       .cell[data-value='2']::before {
@@ -159,11 +156,23 @@ body{
         content: '8';
         color: #7e7e7e;
       }
-      
+
       .flag {
         height: 80%;
       }
-      .cell[data-value='bomb'] {
+      .cell[data-value~='flag'] {
+        background-image: url(./flagicon.png);
+        background-size: 90%;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+      .cell[data-value~='mine'] {
+        background-image: url(./mineIcon.png);
+        background-size: 90%;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+      .cell[data-value~='hit'] {
         background-image: url(./mineIcon.png);
         background-size: 90%;
         background-repeat: no-repeat;
@@ -189,7 +198,9 @@ body{
       <div class="game-board">
         <div class="score-board">
           <div class="bomb-count">010</div>
-          <div class="game-status"><img class="flag" src="./closeFace.png" /></div>
+          <div class="game-status">
+            <img class="flag" src="./closeFace.png" />
+          </div>
           <div class="game-timer">130</div>
         </div>
         <div class="game">
