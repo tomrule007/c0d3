@@ -21,6 +21,7 @@
         display: inline-block;
         border: white outset 1px;
         box-shadow: 2px 2px 5px black;
+        user-select: none;
       }
       .titlebar {
         display: flex;
@@ -55,15 +56,28 @@
         /* TODO: convert to button class to reduce repeated css */
         width: 33px;
         height: 33px;
-
+        background-image: url(./goodFace.png);
+        background-size: 90%;
         box-sizing: border-box;
         border: white outset 3px;
         display: flex;
         align-items: center;
         justify-content: center;
         border-radius: 2px;
+        background-repeat: no-repeat;
+        background-position: center;
       }
-      .bomb-count,
+      .game-status[data-state='depressed'] {
+        background-image: url(./closeFace.png);
+      }
+      .game-status[data-state='loss'] {
+        background-image: url(./looseFace.png);
+      }
+      .game-status[data-state='won'] {
+        background-image: url(./winFace.png);
+      }
+
+      .mine-count,
       .game-timer {
         color: #c21519;
         background-color: #070705;
@@ -197,31 +211,15 @@
       </div>
       <div class="game-board">
         <div class="score-board">
-          <div class="bomb-count">010</div>
-          <div class="game-status">
-            <img class="flag" src="./closeFace.png" />
-          </div>
-          <div class="game-timer">130</div>
+          <div class="mine-count">010</div>
+          <div class="game-status" data-state=""></div>
+          <div class="game-timer">000</div>
         </div>
         <div class="game">
           <div class="row">
             <div class="cell"></div>
-            <div class="cell exposed" data-value="6"></div>
-            <div class="cell exposed" data-value="bomb"></div>
             <div class="cell"></div>
-            <div class="cell depressed"></div>
-            <div class="cell">
-              <img class="flag" src="./flagicon.png" />
-            </div>
             <div class="cell"></div>
-            <div class="cell exposed" data-value="7"></div>
-            <div class="cell exposed" data-value="8"></div>
-            <div class="cell"></div>
-          </div>
-          <div class="row">
-            <div class="cell"></div>
-            <div class="cell exposed"></div>
-            <div class="cell exposed"></div>
             <div class="cell"></div>
             <div class="cell"></div>
             <div class="cell"></div>
@@ -233,8 +231,8 @@
           <div class="row">
             <div class="cell"></div>
             <div class="cell"></div>
-            <div class="cell exposed" data-value="4"></div>
-            <div class="cell exposed" data-value="5"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
             <div class="cell"></div>
             <div class="cell"></div>
             <div class="cell"></div>
@@ -260,9 +258,21 @@
             <div class="cell"></div>
             <div class="cell"></div>
             <div class="cell"></div>
-            <div class="cell exposed" data-value="1"></div>
-            <div class="cell exposed" data-value="2"></div>
-            <div class="cell exposed" data-value="3"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+          </div>
+          <div class="row">
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
             <div class="cell"></div>
             <div class="cell"></div>
           </div>
