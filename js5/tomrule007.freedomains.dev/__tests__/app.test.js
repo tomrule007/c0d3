@@ -3,7 +3,51 @@ const { app } = require('../app');
 const fetch = require('node-fetch');
 const { startServer, stopServer } = require('../utilities');
 
-describe('js5/p2', () => {
+describe('js5/p3 (/memegen/api...)', () => {
+  let server;
+  let port;
+
+  beforeAll(async (done) => {
+    try {
+      [server, port] = await startServer(app);
+    } catch (error) {
+      console.error('Server Starting Error', error);
+    }
+
+    done();
+  });
+
+  afterAll(() => stopServer(server, port));
+
+  it('server starts', () => {
+    expect(server instanceof http.Server).toBe(true);
+  });
+  it('port is set', () => {
+    expect(typeof port).toBe('number');
+  });
+  xit('Matches snapshot test', async () => {});
+
+  describe('Handles invalid params with json error msg and status 400', () => {
+    it.each`
+      input                 | expected
+      ${'text?no=wrong'}    | ${{ error: 'invalid parameter: no' }}
+      ${'text?blur=wrong'}  | ${{ error: 'invalid parameter value: blur expects type Number' }}
+      ${'text?black=wrong'} | ${{ error: 'invalid parameter value: black expects type Bool' }}
+      ${'text?src=wrong'}   | ${{ error: 'invalid parameter value: src expects valid URL string' }}
+    `('$input --> $expected', async (input, expected) => {
+      const response = await fetch(
+        `http://localhost:${port}/memegen/api/${input}`
+      );
+      const content =
+        response.status === 400 ? await response.json() : await response.text();
+
+      expect(content).toEqual(expected);
+      expect(response.status).toBe(400);
+    });
+  });
+});
+
+xdescribe('js5/p2', () => {
   let server;
   let port;
 
