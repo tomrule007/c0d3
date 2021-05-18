@@ -2,7 +2,8 @@ const { getVisitorView } = require('./visitorView');
 const fs = require('fs');
 const fetch = require('node-fetch');
 const { spawn } = require('child_process');
-var Jimp = require('jimp');
+const Jimp = require('jimp');
+const { LRUCache } = require('./utilities');
 const path = require('path');
 const express = require('express');
 const app = express();
@@ -129,35 +130,7 @@ function runCommand(cmd, params) {
 
 // JS5 -  Problem 3
 
-const imageCache = [];
-
-// TODO: LRU (Lease Recent Used) Cache
-// (() => {
-//   const cacheLimit = 10;
-//   const size = 0;
-
-//   const cache = {};
-//   const queue = [];
-
-//   const has = (src) => cache.hasOwnProperty(src);
-//   const get = (src) => {
-//     cache[src];
-//   };
-//   const set = (src, image) => {
-//     if (has(src)) {
-//       // move to back of queue
-//       const item = src;
-//     } else {
-//       let s;
-//     }
-//   };
-
-//   return {
-//     has,
-//     get,
-//     set,
-//   };
-// })();
+const imageCache = new LRUCache(10);
 
 app.get('/memegen/api/', (req, res) => {
   res.status(400);
@@ -195,22 +168,15 @@ app.get('/memegen/api/:text', async (req, res) => {
 
   try {
     const fontColor =
-      black && black.toLowerCase() === 'false' ? 'WHITE' : 'BLACK';
+      black && black.toLowerCase() === 'true' ? 'BLACK' : 'WHITE';
     const font = await Jimp.loadFont(Jimp[`FONT_SANS_32_${fontColor}`]);
-    const image = await Jimp.read({
-      url: imageCache[src] || src || 'https://placeimg.com/640/480/any',
-    });
+    const image = await Jimp.read(
+      imageCache.get(src) || {
+        url: src || 'https://placeimg.com/640/480/any',
+      }
+    );
 
-    // TODO: update cache
-    if (src) {
-      // const indexOfSrc = imageCache.indexOf(src);
-      // if (indexOfScr > -1) imageCache.splice(indexOfSrc, 1); // remove from cache
-      // im;
-      // if (imageCache.length > 10)
-      //   // Not cached, add to back
-      //   imageCache.pop();
-      // console.log('TODO: REFRESH CACHED ITEM');
-    }
+    if (src) imageCache.set(src, image);
 
     // blur
     if (blur) await image.blur(Number(blur));
@@ -238,10 +204,24 @@ app.get('/memegen/api/:text', async (req, res) => {
     res.set('Content-Type', 'image/jpeg');
     res.send(buffer);
   } catch (err) {
-    res.json({
-      error: 'unhandled err',
-      err,
-    });
+    let errResponse;
+
+    // Check for known response or serve default;
+    switch (err.message) {
+      case 'Could not find MIME for Buffer <null>':
+      case 'Invalid / unknown URL protocol. Expected HTTP or HTTPS.':
+        errResponse = {
+          error: `Unable to fetch image, src: ${src}`,
+        };
+        break;
+      default:
+        errResponse = {
+          error: 'unhandled err',
+          msg: err.message,
+        };
+        break;
+    }
+    res.json(errResponse);
   }
 });
 

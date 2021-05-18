@@ -22,10 +22,30 @@ describe('js5/p3 (/memegen/api...)', () => {
   it('server starts', () => {
     expect(server instanceof http.Server).toBe(true);
   });
+
   it('port is set', () => {
     expect(typeof port).toBe('number');
   });
-  xit('Matches snapshot test', async () => {});
+
+  it('should cache image and only make one fetch', async () => {
+    // Module used by Jimp to fetch image
+    jest.mock('phin', () => jest.fn(jest.requireActual('phin')));
+    const p = require('phin');
+
+    const imageSrc = `http://localhost:${port}/js5-p3-test-dont-delete.jpeg`;
+
+    // First call
+    await fetch(`http://localhost:${port}/memegen/api/test?src=${imageSrc}`);
+    // Second call
+    await fetch(`http://localhost:${port}/memegen/api/test?src=${imageSrc}`);
+
+    expect(p).toHaveBeenCalledWith(
+      { compression: true, url: imageSrc },
+      expect.anything()
+    );
+
+    expect(p).toHaveBeenCalledTimes(1);
+  });
 
   describe('Handles invalid requests with detailed error msgs', () => {
     it.each`
@@ -136,7 +156,7 @@ describe('js5/p2', () => {
 
       expect(content).toEqual({
         ...input,
-        stdout: 'app.test.js\ntest.txt\n',
+        stdout: 'app.test.js\ntest.txt\nutilities.test.js\n',
         stderr: null,
         exitCode: 0,
       });
