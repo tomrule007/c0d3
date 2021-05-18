@@ -27,14 +27,14 @@ describe('js5/p3 (/memegen/api...)', () => {
   });
   xit('Matches snapshot test', async () => {});
 
-  describe('Handles invalid params with json error msg and status 400', () => {
+  describe('Handles invalid requests with detailed error msgs', () => {
     it.each`
       input                 | expected
-      ${'text?no=wrong'}    | ${{ error: 'invalid parameter: no' }}
-      ${'text?blur=wrong'}  | ${{ error: 'invalid parameter value: blur expects type Number' }}
-      ${'text?black=wrong'} | ${{ error: 'invalid parameter value: black expects type Bool' }}
-      ${'text?src=wrong'}   | ${{ error: 'invalid parameter value: src expects valid URL string' }}
-    `('$input --> $expected', async (input, expected) => {
+      ${'?no=wrong'}        | ${{ error: 'Must include text as last value in path' }}
+      ${'text?no=wrong'}    | ${{ error: 'Invalid parameters: no' }}
+      ${'text?blur=wrong'}  | ${{ error: 'Invalid parameter value: blur expects type Number' }}
+      ${'text?black=wrong'} | ${{ error: 'Invalid parameter value: black expects true|false' }}
+    `('$input --> $expected', async ({ input, expected }) => {
       const response = await fetch(
         `http://localhost:${port}/memegen/api/${input}`
       );
@@ -47,7 +47,7 @@ describe('js5/p3 (/memegen/api...)', () => {
   });
 });
 
-xdescribe('js5/p2', () => {
+describe('js5/p2', () => {
   let server;
   let port;
 
