@@ -1,7 +1,7 @@
 const router = require('express').Router();
 // JS5 -  Problem 3
 const Jimp = require('jimp');
-const { LRUCache } = require('../../utilities');
+const { LRUCache } = require('../utilities');
 
 const imageCache = new LRUCache(10);
 

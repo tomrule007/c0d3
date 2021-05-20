@@ -1,4 +1,4 @@
-module.exports = ({ hotSwapper = '' } = {}) => `<!DOCTYPE html>
+module.exports = () => `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -21,7 +21,6 @@ module.exports = ({ hotSwapper = '' } = {}) => `<!DOCTYPE html>
         padding: 5px;
       }
     </style>
-     ${hotSwapper}
   </head>
   <body>
     <header>

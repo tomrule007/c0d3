@@ -1,4 +1,4 @@
-module.exports = ({ town, latLng, hotSwapper = '' } = {}) => `<!DOCTYPE html>
+module.exports = ({ town, latLng } = {}) => `<!DOCTYPE html>
   <html lang="en">
     <head>
       <meta charset="UTF-8" />
@@ -14,7 +14,6 @@ module.exports = ({ town, latLng, hotSwapper = '' } = {}) => `<!DOCTYPE html>
           width: 100%;
         }
       </style>
-      ${hotSwapper}
     </head>
     <body>
       <h1>You Are visiting from ${town}</h1>

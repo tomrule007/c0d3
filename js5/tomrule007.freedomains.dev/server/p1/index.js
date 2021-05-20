@@ -1,8 +1,7 @@
 const router = require('express').Router();
 const fs = require('fs');
 const getVisitorView = require('./view');
-const hotClient = require('../../../hot-client');
-const { compose, last, split } = require('../../utilities');
+const { compose, last, split } = require('../utilities');
 
 // constants
 const VISITOR_LOG_FILE = './visitorLog';
@@ -42,24 +41,11 @@ router.get('/*', async (req, res, next) => {
   next();
 });
 
-router.get('/hotSwapper', (req, res) => {
-  res.send(
-    `<html>
-      <head>
-        <title>Socket client</title>
-       ${hotClient()}
-      </head>
-      <body></body>
-    </html>`
-  );
-});
-
 router.get('/visitor', (req, res) => {
   res.send(
     getVisitorView({
       town: req.user.cityStr,
       latLng: req.user.latLng,
-      hotSwapper: hotClient(),
     })
   );
 });

@@ -1,7 +1,7 @@
 var http = require('http');
-const app = require('../server/index');
+const app = require('../server/app');
 const fetch = require('node-fetch');
-const { startServer, stopServer } = require('../server/app/utilities');
+const { startServer, stopServer } = require('../server/utilities');
 
 describe('js5/p3 (/memegen/api...)', () => {
   let server;

@@ -3,7 +3,6 @@ const path = require('path');
 const { spawn } = require('child_process');
 const getCommandsView = require('./view');
 // JS5 -  Problem 2
-console.log('testing');
 routerP2.get('/commands', (req, res) => {
   res.send(getCommandsView());
 });
