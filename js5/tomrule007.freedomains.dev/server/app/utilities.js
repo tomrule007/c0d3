@@ -1,3 +1,11 @@
+const compose =
+  (...fns) =>
+  (x) =>
+    fns.reduceRight((x, y) => y(x), x);
+
+const last = (a) => a[a.length - 1];
+const split = (separator) => (string) => string.split(separator);
+
 // Start & Stop server functions for test runner
 const startServer = (app, port = 3000) =>
   new Promise((resolve, reject) => {
@@ -96,4 +104,4 @@ class LRUCache {
   }
 }
 
-module.exports = { startServer, stopServer, LRUCache };
+module.exports = { compose, split, last, startServer, stopServer, LRUCache };

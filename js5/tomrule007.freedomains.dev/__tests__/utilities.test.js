@@ -1,4 +1,4 @@
-const { LRUCache } = require('../utilities');
+const { LRUCache } = require('../server/app/utilities');
 
 describe('LRU Cache', () => {
   let cache;

@@ -1,7 +1,7 @@
 var http = require('http');
-const { app } = require('../app');
+const app = require('../server/index');
 const fetch = require('node-fetch');
-const { startServer, stopServer } = require('../utilities');
+const { startServer, stopServer } = require('../server/app/utilities');
 
 describe('js5/p3 (/memegen/api...)', () => {
   let server;
@@ -17,7 +17,10 @@ describe('js5/p3 (/memegen/api...)', () => {
     done();
   });
 
-  afterAll(() => stopServer(server, port));
+  afterAll(() => {
+    stopServer(server, port);
+    console.log('all stopped');
+  });
 
   it('server starts', () => {
     expect(server instanceof http.Server).toBe(true);

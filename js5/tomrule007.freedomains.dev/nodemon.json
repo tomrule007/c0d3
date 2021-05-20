@@ -1,4 +1,11 @@
 {
+  "verbose": true,
+  "watch": ["server/app/index.js", "start.js"],
+  "ext": "js",
+  "env": {
+    "NODE_ENV": "development",
+    "PORT": 1337
+  },
   "events": {
     "crash": "sh -c 'lsof -i :${PORT:-8123} -t | xargs kill' && npm run dev"
   }

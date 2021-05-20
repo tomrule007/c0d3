@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+module.exports = ({ hotSwapper = '' } = {}) => `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -21,6 +21,7 @@
         padding: 5px;
       }
     </style>
+     ${hotSwapper}
   </head>
   <body>
     <header>
@@ -41,3 +42,4 @@
     <script src="commands.js"></script>
   </body>
 </html>
+`;
