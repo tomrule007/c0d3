@@ -5,16 +5,15 @@ const { LRUCache } = require('../utilities');
 
 const imageCache = new LRUCache(10);
 
-router.get('/memegen/api/', (req, res) => {
-  res.status(400);
-  res.json({ error: 'Must include text as last value in path' });
-});
-
-router.get('/memegen/api/:text', async (req, res) => {
+router.get('/memegen/api/:text?', async (req, res) => {
   const { text } = req.params;
   const { src, blur, black } = req.query;
 
   res.status(400);
+  // text param is required
+  if (!text)
+    return res.json({ error: 'Must include text as last value in path' });
+
   // invalid query params error
   const validQueryParams = ['src', 'blur', 'black'];
   const extraQueryParams = Object.keys(req.query).filter(
