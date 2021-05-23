@@ -36,6 +36,16 @@ const stopServer = (server, port) =>
     }
   });
 
+const logAndThrowErrors = async (response, fileName) => {
+  if (response.ok) return;
+
+  const testFile = require('path').basename(fileName);
+  const logFile = './errorLog-' + testFile + '.html';
+
+  await fs.writeFile(logFile, await response.text());
+  throw Error(`ERROR FILE LOGGED: ${logFile}`);
+};
+
 /** Class LRU Cache (Lease Recent Used)*/
 class LRUCache {
   /**
@@ -104,4 +114,13 @@ class LRUCache {
   }
 }
 
-module.exports = { compose, split, last, startServer, stopServer, LRUCache };
+module.exports = {
+  compose,
+  split,
+  last,
+  startServer,
+  stopServer,
+  logAndThrowErrors,
+  flushPromises,
+  LRUCache,
+};

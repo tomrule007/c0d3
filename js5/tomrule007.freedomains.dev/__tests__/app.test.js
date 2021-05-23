@@ -17,10 +17,7 @@ describe('js5/p3 (/memegen/api...)', () => {
     done();
   });
 
-  afterAll(() => {
-    stopServer(server, port);
-    console.log('all stopped');
-  });
+  afterAll(() => stopServer(server, port));
 
   it('server starts', () => {
     expect(server instanceof http.Server).toBe(true);
