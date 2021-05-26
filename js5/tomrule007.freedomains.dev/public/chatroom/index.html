@@ -1,33 +1,56 @@
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/gh/andybrewer/mvp/mvp.css"
-/>
-<style>
-  .todo-container {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-  }
-  .todo-container > h1 {
-    margin: 0;
-  }
-  .item-button {
-    margin: 0 10px;
-    height: 34px;
-    padding: 0 5px;
-    width: 80px;
-  }
-  .todo-edit-input {
-    margin: auto;
-    width: 100%;
-    display: inline-block;
-  }
-  .save {
-    background-color: green;
-    border-color: green;
-  }
-</style>
-<script src="https://js5.c0d3.com/auth.js"></script>
-<main class="app-container"></main>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        display: flex;
+        height: 100vh;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+      }
+      .chatroom {
+        width: 100%;
+        overflow: auto;
+      }
+      .chatroom-input-container {
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+      .chatroom-input-text {
+        flex-grow: 1;
+      }
+      .chat-msg {
+        display: flex;
+        flex-direction: row;
+        margin: 5px;
+      }
+      .error-msg {
+        color: red;
+      }
 
-<script src="/chatroom/chatroom.js"></script>
+      .app-container {
+        padding: 5px;
+        border-radius: 5px;
+        border: lightgray solid 2px;
+        background-color: lightgoldenrodyellow;
+        max-height: 90vh;
+        min-width: max(50%, 500px);
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app-container"></main>
+
+    <script src="/chatroom/chatroom.js"></script>
+  </body>
+</html>

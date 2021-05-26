@@ -1,131 +1,147 @@
-function Todo(todo, container) {
-  const element = document.createElement('div');
-  container.append(element);
-  element.innerHTML = `
-  <section>
-    <aside class='todo-container'></aside>
-  </section>
-  `;
-  const date = new Date(todo.createdAt);
-  const dateStr = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-  let headerStr = `${todo.text} <small>${dateStr}</small>`;
-  if (todo.complete) {
-    headerStr = `<strike>${headerStr}</strike>`;
-  }
+const AUTH_KEY = 'AUTH_KEY'; // used to store jwt token in local storage.
 
-  const todoContainer = element.querySelector('.todo-container');
+const getMessages = (room) =>
+  fetch(`/api/${room}/messages`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('AUTH_KEY')}`,
+    },
+  }).then((r) => {
+    if (r.ok) return r.json();
 
-  const renderNormal = () => {
-    todoContainer.innerHTML = `
-      <h1>${headerStr}</h1>
-      <section>
-      <button class="item-button edit">Edit</button>
-      <button class="item-button delete">Delete</button>
-      </section>
-    `;
-    const edit = todoContainer.querySelector('.edit');
-    edit.addEventListener('click', renderEdit);
-    const $h1 = todoContainer.querySelector('h1');
-    $h1.addEventListener('click', () => {
-      fetch(`https://js5.c0d3.com/todolist/api/todos/${todo.id}`, {
-        credentials: 'include',
-        method: 'PATCH',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          complete: !todo.complete,
-        }),
-      }).then(render);
-    });
-    const $delete = todoContainer.querySelector('.delete');
-    $delete.addEventListener('click', () => {
-      fetch(`https://js5.c0d3.com/todolist/api/todos/${todo.id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      }).then(render);
-    });
-  };
-  const renderEdit = () => {
-    todoContainer.innerHTML = `
-      <input type="text" class="todo-edit-input" value="${todo.text}">
-      <section>
-      <button class="item-button cancel">Cancel</button>
-      <button class="item-button save">Save</button>
-      </section>
-    `;
-    const $cancel = todoContainer.querySelector('.cancel');
-    $cancel.addEventListener('click', renderNormal);
-    const $todoInput = todoContainer.querySelector('.todo-edit-input');
-    const $save = todoContainer.querySelector('.save');
-    $save.addEventListener('click', () => {
-      fetch(`https://js5.c0d3.com/todolist/api/todos/${todo.id}`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          text: $todoInput.value,
-        }),
-      }).then(render);
-    });
-  };
-  renderNormal();
-}
-
-const render = () => {
-  $appContainer.innerHTML = `
-  <header>
-    <h1>Todo List for ${globalUsername}</h1>
-  </header>
-  <div class="todolist">
-  <section>
-    <aside class='todo-container'>
-      <input type="text" class="todo-edit-input" value="">
-    </aside>
-  </section>
-  </div>
-  `;
-  const input = $appContainer.querySelector('.todo-edit-input');
-  input.focus();
-  input.addEventListener('keyup', (e) => {
-    if (e.key === 'Enter') {
-      fetch('https://js5.c0d3.com/todolist/api/todos ', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          text: input.value,
-        }),
-      })
-        .then((r) => {
-          return r.json();
-        })
-        .then(render);
-    }
+    return Promise.reject(r);
   });
 
-  const $todolist = $appContainer.querySelector('.todolist');
-  // create a Todo object like this: new Todo(element, $todolist)
-
-  fetch('https://js5.c0d3.com/todolist/api/todos', {
-    method: 'GET',
-    credentials: 'include',
+const sendMessage = (room, message) => {
+  console.log('sending', {
+    room,
+    message,
+    jwt: localStorage.getItem('AUTH_KEY'),
+  });
+  return fetch(`/api/${room}/messages`, {
+    method: 'POST',
     headers: {
       'content-type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('AUTH_KEY')}`,
     },
-  })
-    .then((r) => r.json())
-    .then((todos) => {
-      todos.forEach((todo) => new Todo(todo, $todolist));
-    });
+    body: JSON.stringify({ message }),
+  });
+};
+const renderLobby = (initialState = {}) => {
+  const { error = '' } = initialState;
+  $appContainer.innerHTML = `
+    <h1>Enter Room Name</h1>
+    <div>
+      <input type="text" id="chatRoomInput" />
+      <div class="error-msg">${error}</div>
+      <button class="submit">Submit</button>
+    </div>
+    </div>
+  `;
+  const $input = $appContainer.querySelector('#chatRoomInput');
+  const $submit = $appContainer.querySelector('.submit');
+  const $errorDisplay = $appContainer.querySelector('.error-msg');
+  $input.focus();
+
+  const clearLoadError = () => {
+    $errorDisplay.innerText = '';
+  };
+
+  const renderLoadError = (error) => {
+    console.log(error);
+    $errorDisplay.innerText = `${error.msg}`;
+    $input.focus();
+  };
+
+  const handleLoadRoom = (room) => {
+    if (!room)
+      return renderLoadError({ msg: 'Must provide non empty room name' });
+    renderChatRoom(room);
+  };
+  $input.addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') handleLoadRoom($input.value);
+  });
+  $submit.addEventListener('click', () => handleLoadRoom($input.value));
 };
 
-let globalUsername;
-const setupLogin = () => {
+function renderChatRoom(room) {
+  $appContainer.innerHTML = `
+    <h1>Chatroom: ${room}</h1>
+    <div class="chatroom" tabindex="0"></div>
+      <hr width="100%" />
+    <div class="chatroom-input-container">
+    
+      <input
+        title="message input"
+        type="text"
+        class="chatroom-input-text"
+        placeholder="message"
+      />
+      <button class="chatroom-input-send">send</button>
+    </div>
+  `;
+
+  // DOM Refs
+  const $chatroom = document.querySelector('.chatroom');
+  const $input = document.querySelector('.chatroom-input-text');
+  const $send = document.querySelector('.chatroom-input-send');
+
+  let messageCount = 0;
+  const addNewMessages = (messages = []) => {
+    messages.slice(messageCount).forEach(([username, message]) => {
+      messageCount += 1;
+
+      const container = document.createElement('div');
+      container.innerHTML = `<b>${username}:</b><span>${message}</span>`;
+
+      container.classList.add('chat-msg');
+      $chatroom.append(container);
+    });
+  };
+
+  let msgPollRef;
+  const getAndRenderMessages = () =>
+    getMessages(room)
+      .then((messages) => {
+        // Bonus feature: If scrolled to bottom keep it scrolled to bottom
+        const scrolledToBottom =
+          $chatroom.scrollTop ===
+          $chatroom.scrollHeight - $chatroom.clientHeight;
+
+        addNewMessages(messages);
+
+        if (scrolledToBottom) {
+          $chatroom.scrollTop = $chatroom.scrollHeight;
+        }
+      })
+      .catch((error) => {
+        // Assume all errors at this point are invalid room name
+        if (msgPollRef) clearInterval(msgPollRef);
+        renderLobby({ error: 'Invalid Room Name' });
+      });
+
+  // Poll for new messages
+  msgPollRef = setInterval(() => {
+    getAndRenderMessages();
+  }, 2000);
+
+  // Initial Render
+  getAndRenderMessages();
+
+  // EVENT HANDLERS
+  const handleSendMsg = () => {
+    sendMessage(room, $input.value).then(() => {
+      $input.value = '';
+      getAndRenderMessages();
+    });
+  };
+
+  // EVENT LISTENERS
+
+  $send.addEventListener('click', handleSendMsg);
+  $input.addEventListener('keyup', (e) => e.key === 'Enter' && handleSendMsg());
+}
+
+const renderLogin = () => {
   $appContainer.innerHTML = `
     <h1>You must be logged in</h1>
     <p> No Account? You can
@@ -140,7 +156,7 @@ const setupLogin = () => {
   const $instead = document.querySelector('.instead');
   const $submit = document.querySelector('.submit');
   $instead.addEventListener('click', () => {
-    setupSignup();
+    renderSignUp();
   });
   $submit.addEventListener('click', () => {
     fetch('https://js5.c0d3.com/auth/api/sessions', {
@@ -156,15 +172,15 @@ const setupLogin = () => {
     })
       .then((r) => r.json())
       .then((body) => {
-        if (body.username) {
-          globalUsername = body.username;
-          render();
+        if (body.jwt) {
+          localStorage.setItem(AUTH_KEY, body.jwt);
+          renderLobby();
         }
       });
   });
 };
 
-const setupSignup = () => {
+const renderSignUp = () => {
   $appContainer.innerHTML = `
     <h1>New Account!</h1>
     <p> Already have an account? You can
@@ -183,10 +199,9 @@ const setupSignup = () => {
   const $instead = document.querySelector('.instead');
   const $submit = document.querySelector('.submit');
   $instead.addEventListener('click', () => {
-    setupLogin();
+    renderLogin();
   });
   $submit.addEventListener('click', () => {
-    console.log('clicky', atob($password.value));
     fetch('https://js5.c0d3.com/auth/api/users', {
       method: 'POST',
       credentials: 'include',
@@ -202,23 +217,28 @@ const setupSignup = () => {
       }),
     })
       .then((r) => r.json())
-      .then((body) => console.log(body));
+      .then((body) => {
+        if (body.jwt) {
+          localStorage.setItem(AUTH_KEY, body.jwt);
+          renderLobby();
+        }
+      });
   });
 };
 
 const $appContainer = document.querySelector('.app-container');
+
 const startApp = () => {
-  fetch('https://js5.c0d3.com/auth/api/sessions', {
+  fetch('/api/session', {
     method: 'GET',
-    credentials: 'include',
+    headers: {
+      authorization: `Bearer ${localStorage.getItem(AUTH_KEY)}`,
+    },
   })
     .then((response) => response.json())
     .then((body) => {
-      if (body.error) setupLogin();
-      if (body.username) {
-        globalUsername = body.username;
-        render();
-      }
+      if (body.error) return renderLogin();
+      renderLobby();
     });
 };
 startApp();
