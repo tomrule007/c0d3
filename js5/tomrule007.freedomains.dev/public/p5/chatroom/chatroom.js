@@ -1,7 +1,7 @@
 const AUTH_KEY = 'AUTH_KEY'; // used to store jwt token in local storage.
 
 const getMessages = (room) =>
-  fetch(`/api/${room}/messages`, {
+  fetch(`/p5/api/${room}/messages`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem('AUTH_KEY')}`,
     },
@@ -17,7 +17,7 @@ const sendMessage = (room, message) => {
     message,
     jwt: localStorage.getItem('AUTH_KEY'),
   });
-  return fetch(`/api/${room}/messages`, {
+  return fetch(`/p5/api/${room}/messages`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
@@ -229,7 +229,7 @@ const renderSignUp = () => {
 const $appContainer = document.querySelector('.app-container');
 
 const startApp = () => {
-  fetch('/api/session', {
+  fetch('/p5/api/session', {
     method: 'GET',
     headers: {
       authorization: `Bearer ${localStorage.getItem(AUTH_KEY)}`,
