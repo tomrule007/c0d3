@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../app');
-const { VALID_MOCK_USER } = require('./index');
+const { VALID_MOCK_USER, VALID_MOCK_USER_PASSWORD } = require('./index');
 describe('js5/p6', () => {
   describe('POST p6/api/users', () => {
     describe('password field cannot be blank and must be >5 letters', () => {
@@ -121,7 +121,7 @@ describe('js5/p6', () => {
               username: 'tommyboy',
               email: 'im@good',
             })
-            .expect(400)
+            .expect(200)
             .then((response) => {
               expect(response.body).toEqual(goodEmailResponse);
             });
@@ -132,7 +132,8 @@ describe('js5/p6', () => {
 
   describe('POST p6/api/sessions', () => {
     it('Can login with username/password', async () => {
-      const { username, email, password } = VALID_MOCK_USER;
+      const { username, email } = VALID_MOCK_USER;
+      const password = VALID_MOCK_USER_PASSWORD;
       await request(app)
         .post('/p6/api/sessions')
         .send({ username, password })
@@ -145,7 +146,8 @@ describe('js5/p6', () => {
     });
 
     it('Can login with email/password', async () => {
-      const { username, email, password } = VALID_MOCK_USER;
+      const { username, email } = VALID_MOCK_USER;
+      const password = VALID_MOCK_USER_PASSWORD;
       await request(app)
         .post('/p6/api/sessions')
         .send({ email, password })
@@ -158,7 +160,8 @@ describe('js5/p6', () => {
     });
 
     it('Login does not return password or hash', async () => {
-      const { username, email, password } = VALID_MOCK_USER;
+      const { username, email } = VALID_MOCK_USER;
+      const password = VALID_MOCK_USER_PASSWORD;
       await request(app)
         .post('/p6/api/sessions')
         .send({ username, password })
@@ -171,7 +174,9 @@ describe('js5/p6', () => {
     });
   });
   describe('GET /p6/api/sessions', () => {
-    const { username, email, password, jwt } = VALID_MOCK_USER;
+    const { username, email, jwt } = VALID_MOCK_USER;
+    const password = VALID_MOCK_USER_PASSWORD;
+
     it('Gets user with JWT authorization header ', async () => {
       await request(app)
         .get('/p6/api/sessions')
