@@ -128,6 +128,24 @@ describe('js5/p6', () => {
         });
       });
     });
+    describe('Accept extra key/value pairs during signup', () => {
+      it('returns extra key', async () => {
+        await request(app)
+          .post('/p6/api/users')
+          .send({
+            password: 'getpast',
+            username: 'tommyboyTwo',
+            email: 'im2@good',
+            extra: 'key',
+          })
+          .expect(200)
+          .then((response) => {
+            expect(response.body).toEqual(
+              expect.objectContaining({ extra: 'key' })
+            );
+          });
+      });
+    });
   });
 
   describe('POST p6/api/sessions', () => {
@@ -160,7 +178,7 @@ describe('js5/p6', () => {
     });
 
     it('Login does not return password or hash', async () => {
-      const { username, email } = VALID_MOCK_USER;
+      const { username } = VALID_MOCK_USER;
       const password = VALID_MOCK_USER_PASSWORD;
       await request(app)
         .post('/p6/api/sessions')
@@ -174,17 +192,22 @@ describe('js5/p6', () => {
     });
   });
   describe('GET /p6/api/sessions', () => {
-    const { username, email, jwt } = VALID_MOCK_USER;
+    const { username, email, name } = VALID_MOCK_USER;
     const password = VALID_MOCK_USER_PASSWORD;
 
     it('Gets user with JWT authorization header ', async () => {
+      const response = await request(app)
+        .post('/p6/api/sessions')
+        .send({ username, password });
+      const { jwt } = response.body;
+
       await request(app)
         .get('/p6/api/sessions')
         .set('Authorization', `Bearer ${jwt}`)
         .expect(200)
         .then((response) => {
           expect(response.body).toEqual(
-            expect.objectContaining({ username, email, jwt })
+            expect.objectContaining({ username, email, name, jwt })
           );
         });
     });

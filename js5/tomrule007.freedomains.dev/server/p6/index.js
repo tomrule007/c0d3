@@ -1,8 +1,24 @@
 const router = require('express').Router();
-const fs = require('fs').promises;
-const fetch = require('node-fetch');
 const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+// ! Would be environment variable in real app
+const SECRET_JWT_KEY = 'moreLikePublicKey';
+
+const createJwtToken = (user) =>
+  new Promise((resolve, reject) => {
+    jwt.sign(user, SECRET_JWT_KEY, { algorithm: 'HS256' }, (err, token) =>
+      err ? reject(err) : resolve(token)
+    );
+  });
+
+const verifyJwtToken = (token) =>
+  new Promise((resolve, reject) => {
+    jwt.verify(token, SECRET_JWT_KEY, (err, decoded) =>
+      err ? reject(err) : resolve(decoded)
+    );
+  });
 
 const encryptPassword = (password) =>
   new Promise((resolve, reject) => {
@@ -22,10 +38,11 @@ const verifyPassword = (password, hash) =>
 // Mock User for testing
 const VALID_MOCK_USER_PASSWORD = 'superSecure';
 const VALID_MOCK_USER = {
+  name: 'tommy',
   username: 'testUser',
   email: 'test@mock.com',
+  id: 'c60c7e46-5719-41df-bc35-405c0e678236',
   hash: '$2b$10$La1oIdvnCAUfHPLkc0onqe09pfZlhDVi8LRw8eMPWcGtvpQLIV7je',
-  jwt: 'fakeJWTtoStart',
 };
 
 const users = process.env.NODE_ENV === 'test' ? [VALID_MOCK_USER] : [];
@@ -41,8 +58,7 @@ const getUserByKeyValue = (keyValue) =>
   });
 
 router.post('/api/users', async (req, res) => {
-  const { password, username, email } = req.body;
-  //TODO: ENCRYPT PASSWORD
+  const { password, username, email, ...extras } = req.body;
 
   if (!password || password.length <= 5)
     return res.status(400).json({
@@ -79,9 +95,11 @@ router.post('/api/users', async (req, res) => {
   // Create user
   await encryptPassword(password)
     .then((hash) => {
-      const newUser = { email, username, hash, id: uuidv4() };
+      const newUser = { email, username, hash, id: uuidv4(), ...extras };
       users.push(newUser);
-      res.status(200).json(newUser);
+      return createJwtToken(newUser).then((jwt) =>
+        res.status(200).json({ ...newUser, jwt })
+      );
     })
     .catch((err) => {
       console.log('encryptPassword', err);
@@ -109,11 +127,9 @@ router.post('/api/sessions', async (req, res) => {
     .then((isValidPassword) => {
       if (!isValidPassword)
         return res.status(400).json({ error: { message: 'User not found' } });
-
-      // create jwt
-      // TODO: CREATE AND RETURN JWT
-
-      return res.status(200).json({ ...user, jwt: 'mynewjwt' });
+      return createJwtToken(user).then((jwt) => {
+        return res.status(200).json({ ...user, jwt });
+      });
     })
     .catch((err) => {
       console.log('encryptPassword', err);
@@ -121,17 +137,21 @@ router.post('/api/sessions', async (req, res) => {
     });
 });
 
-router.get('/api/sessions', (req, res) => {
+router.get('/api/sessions', async (req, res) => {
   const jwt = (req.headers.authorization || '').split(' ').pop();
 
-  if (jwt) {
-    //TODO: Change to decode verify
-    const { password, ...user } = getUserByKeyValue({ jwt });
-
-    if (user) return res.status(200).json(user);
-  }
-
-  return res.status(400).json({ error: { message: 'Not logged in' } });
+  const expireTime = Math.floor(Date.now() / 1000) - 60 * 60; // Token expires after 1hr
+  await verifyJwtToken(jwt)
+    .then((decoded) => {
+      const { iat, ...payload } = decoded || {};
+      payload && iat > expireTime
+        ? res.status(200).json({ ...payload, jwt })
+        : res.status(400).json({ error: { message: 'Not logged in' } });
+    })
+    .catch((err) => {
+      console.log('verifyJwtToken', err);
+      return res.status(500).json('Internal Server Error');
+    });
 });
 
 module.exports = router;
