@@ -1,15 +1,31 @@
 const router = require('express').Router();
+const Tesseract = require('tesseract.js');
 const { v4: uuidv4 } = require('uuid');
 const multer = require('multer');
 
 // TODO: Handle temp file storage cleanup
 const upload = multer({ dest: './data/p7/' });
-
-const jobs = [];
+// TODO: Filter non image files
+const jobs = {};
 
 // createJob: Files -> JobId
 const createTextExtractJob = (files) => {
   const jobId = uuidv4();
+
+  jobs[jobId] = {};
+  [...files].forEach((file, fileIndex) => {
+    Tesseract.recognize(file.path, 'eng', {
+      logger: ({ status, progress }) => {
+        // const { workerId, status, progress } = m;
+
+        jobs[jobId][fileIndex] = { status, progress };
+        // console.log({ fileIndex, status, progress });
+      },
+    }).then(({ data: { text } }) => {
+      jobs[jobId][fileIndex] = { ...jobs[jobId][fileIndex], text };
+      console.log(jobs[jobId][fileIndex]);
+    });
+  });
 
   return jobId;
 };
