@@ -6,17 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Selfie Queen</title>
     <style>
-      .snapshot,
-      .video-display {
-        border: 1px solid black;
-        width: 640px;
-        height: 480px;
-      }
-      .photo-button-container {
-        margin: auto 0;
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
       .photo-button {
-        margin: 0 auto;
+        margin: 0.5em;
         padding: 0.5em 1em;
         font-size: xx-large;
         border-radius: 1em;
@@ -25,16 +21,16 @@
   </head>
 
   <body>
-    <div><video class="video-display"></video></div>
-    <div>
-      <button class="photo-button" alt="Take Photo" disabled="true">📷</button>
-    </div>
-    <canvas class="snapshot"></canvas>
+    <video class="video-display" width="640px" height="480px"></video>
+    <button class="photo-button" alt="Take Photo" disabled="true">📷</button>
+    <canvas class="snapshot" width="640px" height="480px"></canvas>
+    <div class="link-container"></div>
 
     <script>
       const $video = document.querySelector('.video-display');
       const $photoButton = document.querySelector('.photo-button');
       const $snapshot = document.querySelector('.snapshot');
+      const $linkContainer = document.querySelector('.link-container');
       const context = $snapshot.getContext('2d');
 
       navigator.mediaDevices
@@ -54,11 +50,31 @@
       $photoButton.addEventListener('click', (e) => {
         context.drawImage($video, 0, 0, 640, 480);
         const imageData = $snapshot.toDataURL().split(',')[1]; // remove meta data
-        // fetch('./api/images', {
-        //   method: 'POST',
-        //   headers: { 'content-type': 'application/json' },
-        //   body: JSON.stringify({ png: imageData }),
-        // });
+        fetch('./api/images', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ png: imageData }),
+        })
+          .then((r) => r.json())
+          .then((body) => {
+            if (body.error) {
+              $linkContainer.append(`Error: ${body.error}`),
+                document.createElement('br');
+            } else {
+              const $link = document.createElement('a');
+              $link.innerText = body;
+              $link.href = body;
+              $linkContainer.append($link);
+            }
+            $linkContainer.append(document.createElement('br'));
+          })
+          .catch((err) => {
+            console.log(err);
+            $linkContainer.append(
+              `Error: ${err} `,
+              document.createElement('br')
+            );
+          });
       });
     </script>
   </body>
