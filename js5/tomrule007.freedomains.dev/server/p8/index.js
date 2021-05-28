@@ -20,7 +20,13 @@ router.post('/api/selfie', async (req, res) => {
     'base64'
   );
 
-  res.status(200).json({ link: 'p8/selfie/' + uniqueName });
+  res.status(200).json({ link: '/p8/selfie/' + uniqueName });
+});
+
+router.get('/api/selfie', async (req, res) => {
+  const selfies = await fs.readdir(USER_SELFIE_PATH);
+  console.log(selfies);
+  res.status(500).json('unfinished endpoint');
 });
 
 module.exports = router;

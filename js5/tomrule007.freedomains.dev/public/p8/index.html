@@ -50,23 +50,19 @@
       $photoButton.addEventListener('click', (e) => {
         context.drawImage($video, 0, 0, 640, 480);
         const imageData = $snapshot.toDataURL().split(',')[1]; // remove meta data
-        fetch('./api/images', {
+        fetch('api/selfie', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ png: imageData }),
+          body: JSON.stringify({ selfie: imageData }),
         })
           .then((r) => r.json())
           .then((body) => {
-            if (body.error) {
-              $linkContainer.append(`Error: ${body.error}`),
-                document.createElement('br');
-            } else {
-              const $link = document.createElement('a');
-              $link.innerText = body;
-              $link.href = body;
-              $linkContainer.append($link);
-            }
-            $linkContainer.append(document.createElement('br'));
+            if (body.error) throw body.error;
+
+            const $link = document.createElement('a');
+            $link.innerText = body.link;
+            $link.href = body.link;
+            $linkContainer.append($link, document.createElement('br'));
           })
           .catch((err) => {
             console.log(err);
