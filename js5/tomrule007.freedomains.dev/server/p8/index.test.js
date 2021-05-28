@@ -1,9 +1,10 @@
 const app = require('../app');
 const request = require('supertest');
 const fs = require('fs').promises;
+
 const { USER_SELFIE_PATH } = require('./index');
 describe('js5/p8', () => {
-  describe('GET /p8/api/selfie', () => {
+  describe('POST /p8/api/selfie', () => {
     let mockSelfie;
     let link;
     beforeAll(async () => {
@@ -39,6 +40,31 @@ describe('js5/p8', () => {
         .expect(200);
 
       fs.unlink(USER_SELFIE_PATH + imageName);
+    });
+  });
+
+  describe('GET /p8/api/selfie', () => {
+    it('returns array if image links', async () => {
+      // Public folder is exposed as url root
+      const urlPrefix = USER_SELFIE_PATH.split('public').pop();
+
+      const mockFiles = ['tom.png', 'is.png', 'cool.png'].map(
+        (name) => urlPrefix + name
+      );
+
+      jest.spyOn(fs, 'readdir').mockResolvedValue(mockFiles);
+
+      const response = await request(app)
+        .get('/p8/api/selfie')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      expect(fs.readdir).toHaveBeenCalledTimes(1);
+      expect(fs.readdir).toHaveBeenCalledWith(USER_SELFIE_PATH);
+
+      expect(response.body.links).toEqual(expect.arrayContaining(mockFiles));
+
+      fs.readdir.mockRestore();
     });
   });
 });

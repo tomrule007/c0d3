@@ -26,7 +26,16 @@ router.post('/api/selfie', async (req, res) => {
 router.get('/api/selfie', async (req, res) => {
   const selfies = await fs.readdir(USER_SELFIE_PATH);
   console.log(selfies);
-  res.status(500).json('unfinished endpoint');
+  res.status(200).json({ links: selfies });
+});
+
+// ERROR HANDLER
+router.use((err, req, res, next) => {
+  console.log(err);
+
+  return res
+    .status(500)
+    .json({ error: { message: 'Unhandled internal server error' } });
 });
 
 module.exports = router;
