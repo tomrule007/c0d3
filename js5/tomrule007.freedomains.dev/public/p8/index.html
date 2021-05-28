@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Selfie Queen</title>
+    <style>
+      body {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+      }
+      .video-display {
+        border: 1px solid black;
+        width: 1280;
+        height: 720;
+      }
+      .photo-button {
+        margin: 0.5em;
+        padding: 0.5em 1em;
+        font-size: xx-large;
+        border-radius: 1em;
+      }
+      .image-gallery {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 90%;
+        height: 200px;
+        flex-grow: 1;
+        border: 1px solid black;
+        margin: 0 5%;
+        overflow-x: auto;
+      }
+      .image {
+      }
+    </style>
+  </head>
+
+  <body>
+    <video class="video-display"></video>
+    <button class="photo-button" alt="Take Photo">📷</button>
+    <div class="image-gallery"></div>
+
+    <script>
+      navigator.mediaDevices
+        .getUserMedia({
+          audio: false,
+          video: {
+            width: 1280,
+            height: 720,
+            facingMode: 'user',
+          },
+        })
+        .then((stream) => {
+          const $video = document.querySelector('.video-display');
+          $video.srcObject = stream;
+          console.log('stream set');
+          $video.onloadedmetadata = function (e) {
+            $video.play();
+          };
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+      const $photoButton = document.querySelector('.photo-button');
+
+      $photoButton.addEventListener('click', (e) => {
+        const $canvas = document.createElement('canvas');
+        const context = $canvas.getContext('2d');
+        context.drawImage($video, 0, 0);
+        const imageData = $canvas.toDataURL();
+        console.log(imageData);
+      });
+    </script>
+  </body>
+</html>
