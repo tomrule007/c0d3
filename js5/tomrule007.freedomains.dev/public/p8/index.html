@@ -6,73 +6,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Selfie Queen</title>
     <style>
-      body {
-        display: flex;
-        align-items: center;
-        flex-direction: column;
-      }
+      .snapshot,
       .video-display {
         border: 1px solid black;
-        width: 1280;
-        height: 720;
+        width: 640px;
+        height: 480px;
+      }
+      .photo-button-container {
+        margin: auto 0;
       }
       .photo-button {
-        margin: 0.5em;
+        margin: 0 auto;
         padding: 0.5em 1em;
         font-size: xx-large;
         border-radius: 1em;
-      }
-      .image-gallery {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 90%;
-        height: 200px;
-        flex-grow: 1;
-        border: 1px solid black;
-        margin: 0 5%;
-        overflow-x: auto;
-      }
-      .image {
       }
     </style>
   </head>
 
   <body>
-    <video class="video-display"></video>
-    <button class="photo-button" alt="Take Photo">📷</button>
-    <div class="image-gallery"></div>
+    <div><video class="video-display"></video></div>
+    <div>
+      <button class="photo-button" alt="Take Photo" disabled="true">📷</button>
+    </div>
+    <canvas class="snapshot"></canvas>
 
     <script>
+      const $video = document.querySelector('.video-display');
+      const $photoButton = document.querySelector('.photo-button');
+      const $snapshot = document.querySelector('.snapshot');
+      const context = $snapshot.getContext('2d');
+
       navigator.mediaDevices
         .getUserMedia({
           audio: false,
-          video: {
-            width: 1280,
-            height: 720,
-            facingMode: 'user',
-          },
+          video: true,
         })
         .then((stream) => {
-          const $video = document.querySelector('.video-display');
           $video.srcObject = stream;
-          console.log('stream set');
-          $video.onloadedmetadata = function (e) {
-            $video.play();
-          };
+          $video.play();
+          $photoButton.disabled = false;
         })
         .catch((err) => {
           console.log(err);
         });
 
-      const $photoButton = document.querySelector('.photo-button');
-
       $photoButton.addEventListener('click', (e) => {
-        const $canvas = document.createElement('canvas');
-        const context = $canvas.getContext('2d');
-        context.drawImage($video, 0, 0);
-        const imageData = $canvas.toDataURL();
-        console.log(imageData);
+        context.drawImage($video, 0, 0, 640, 480);
+        const imageData = $snapshot.toDataURL().split(',')[1]; // remove meta data
+        // fetch('./api/images', {
+        //   method: 'POST',
+        //   headers: { 'content-type': 'application/json' },
+        //   body: JSON.stringify({ png: imageData }),
+        // });
       });
     </script>
   </body>
