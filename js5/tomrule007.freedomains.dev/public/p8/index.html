@@ -6,18 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Selfie Queen</title>
     <style>
-      .ratio-container {
-        position: relative;
-        width: min(100%, 640px);
-        height: 0;
-        padding-top: 75%;
+      body {
+        margin: 0;
       }
       .snapshot,
-      .video-display {
+      .video-display,
+      .selfie {
         width: min(100%, 640px);
         height: 100%;
       }
-      .snapshot-button {
+      .snapshot-button,
+      .share-button {
+        width: 5em;
         margin: 0.5em;
         padding: 0.5em 1em;
         font-size: 30px;
@@ -30,24 +30,21 @@
         flex-wrap: wrap;
         align-items: center;
         justify-content: center;
+        margin: 0;
       }
       .selfie-gallery {
         width: 100%;
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: left;
         overflow-y: auto;
+        margin: 0;
       }
-      /* .photo-booth {
-        max-height: 90vh;
-      } */
-
-      .link {
-        color: white;
-        position: absolute;
-        left: 1em;
-        bottom: 1em;
-        margin: 0 auto;
+      h1,
+      h2,
+      div {
+        margin: 1em;
+        text-align: center;
       }
       .hidden {
         display: none;
@@ -56,29 +53,34 @@
   </head>
 
   <body>
+    <h1>Selfie Queen</h1>
     <div class="photo-booth">
-      <video class="video-display" width="640px" height="480px"></video>
-
-      <button class="snapshot-button" alt="Take snapshot" disabled="true">
-        📷
-      </button>
-
+      <div>
+        <video class="video-display" width="640px" height="480px"></video>
+        <br />
+        <button class="snapshot-button" alt="Take snapshot" disabled="true">
+          📷
+        </button>
+      </div>
       <div class="snapshot-container hidden">
         <canvas class="snapshot" width="640px" height="480px"></canvas>
-        <a class="link"></a>
+        <br />
+        <button class="share-button" alt="Share snapshot">Share</button>
       </div>
     </div>
-
+    <h2>User Selfies</h2>
     <div class="selfie-gallery"></div>
     <script>
+      // DOM refs
       const $video = document.querySelector('.video-display');
       const $photoButton = document.querySelector('.snapshot-button');
-      const $snapshot = document.querySelector('.snapshot');
       const $snapshotContainer = document.querySelector('.snapshot-container');
+      const $shareButton = document.querySelector('.share-button');
+      const $snapshot = document.querySelector('.snapshot');
       const $selfieGallery = document.querySelector('.selfie-gallery');
-      const $link = document.querySelector('.link');
       const context = $snapshot.getContext('2d');
 
+      // Webcam Setup
       navigator.mediaDevices
         .getUserMedia({
           audio: false,
@@ -93,38 +95,30 @@
           console.log(err);
         });
 
-      $photoButton.addEventListener('click', (e) => {
-        context.drawImage($video, 0, 0, 640, 480);
-        $snapshotContainer.classList.remove('hidden');
-        const imageData = $snapshot.toDataURL().split(',')[1]; // remove meta data
-        fetch('/p8/api/selfie', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ selfie: imageData }),
-        })
-          .then((r) => r.json())
-          .then((body) => {
-            if (body.error) throw body.error;
+      // View Renders
+      const renderSelfie = (url) => {
+        const $selfieContainer = document.createElement('div');
+        $selfieContainer.innerHTML = `
+          <img class="selfie" src= "${url}"/>
+          <a class="selfie-link" href="${url}"> ${url}</a>
+          `;
+        $selfieContainer.classList.add('selfie-container');
 
-            $link.innerText = body.link;
-            $link.href = body.link;
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      });
+        renderedUrls.add(url);
 
-      const photoRenderCount = 0;
-      const renderNewPhotos = (links) => {
-        const selfies = links.slice(photoRenderCount).map((url) => {
-          const $selfie = document.createElement('img');
-          $selfie.src = url;
-          return $selfie;
-        });
-        $selfieGallery.append(...selfies);
+        return $selfieContainer;
       };
 
-      const getAndRenderPhotos = () => {
+      const renderedUrls = new Set();
+      const renderNewPhotos = (urls) => {
+        const newUrls = urls.filter((url) => !renderedUrls.has(url));
+
+        const selfies = newUrls.map(renderSelfie);
+
+        $selfieGallery.prepend(...selfies.reverse());
+      };
+
+      const fetchAndRenderSelfies = () => {
         fetch('/p8/api/selfie')
           .then((r) => r.json())
           .then((body) => {
@@ -137,12 +131,37 @@
           });
       };
 
-      getAndRenderPhotos();
+      // Initial gallery fetch
+      fetchAndRenderSelfies();
 
-      //Poll server for new images every minute
+      // Event Listeners & Polling
+      $photoButton.addEventListener('click', (e) => {
+        context.drawImage($video, 0, 0, 640, 480);
+        $snapshotContainer.classList.remove('hidden');
+      });
+
+      $shareButton.addEventListener('click', () => {
+        const imageData = $snapshot.toDataURL().split(',')[1]; // remove meta data
+        fetch('/p8/api/selfie', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ selfie: imageData }),
+        })
+          .then((r) => r.json())
+          .then((body) => {
+            if (body.error) throw body.error;
+
+            fetchAndRenderSelfies();
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      });
+
+      //Poll server for new images 30seconds
       setInterval(() => {
-        getAndRenderPhotos;
-      }, 1000 * 60);
+        fetchAndRenderSelfies();
+      }, 1000 * 30);
     </script>
   </body>
 </html>

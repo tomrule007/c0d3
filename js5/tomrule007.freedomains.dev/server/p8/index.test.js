@@ -1,6 +1,6 @@
 const app = require('../app');
 const request = require('supertest');
-const fs = require('fs').promises;
+const fs = require('fs');
 
 const { USER_SELFIE_PATH } = require('./index');
 describe('js5/p8', () => {
@@ -9,7 +9,8 @@ describe('js5/p8', () => {
     let link;
     beforeAll(async () => {
       link = null;
-      mockSelfie = await fs.readFile('./public/p8/test-selfie.png', {
+
+      mockSelfie = await fs.promises.readFile('./public/p8/test-selfie.png', {
         encoding: 'base64',
       });
     });
@@ -28,43 +29,55 @@ describe('js5/p8', () => {
         .send({ selfie: mockSelfie })
         .expect('Content-Type', /json/)
         .expect(200);
+
       expect(res.body.link).toMatch(/.png$/);
+
+      // set link for following test
       link = res.body.link;
     });
     it('link works, returns image and status 200', async () => {
       expect(link).toEqual(expect.any(String));
+
       const imageName = link.split('/').pop();
+
       await request(app)
         .get(`/p8/selfie/${imageName}`)
         .expect('Content-Type', /image\/png/)
         .expect(200);
 
-      fs.unlink(USER_SELFIE_PATH + imageName);
+      await fs.promises.unlink(USER_SELFIE_PATH + imageName);
     });
   });
 
   describe('GET /p8/api/selfie', () => {
-    it('returns array if image links', async () => {
-      // Public folder is exposed as url root
-      const urlPrefix = USER_SELFIE_PATH.split('public').pop();
+    let app;
+    beforeAll(() => {
+      //Reset Server to capture on start readdir
+      jest.resetModules();
+      app = require('../app');
+    });
+    it('returns link for each image', async () => {
+      const mockFiles = ['tom.png', 'is.png', 'cool.png'];
 
-      const mockFiles = ['tom.png', 'is.png', 'cool.png'].map(
-        (name) => urlPrefix + name
-      );
-
-      jest.spyOn(fs, 'readdir').mockResolvedValue(mockFiles);
+      jest.spyOn(fs, 'readdirSync').mockReturnValue(mockFiles);
+      jest.spyOn(fs, 'statSync').mockReturnValue({
+        mtime: {
+          getTime: function () {
+            return this.count++;
+          },
+          count: 0,
+        },
+      });
 
       const response = await request(app)
         .get('/p8/api/selfie')
         .expect('Content-Type', /json/)
         .expect(200);
 
-      expect(fs.readdir).toHaveBeenCalledTimes(1);
-      expect(fs.readdir).toHaveBeenCalledWith(USER_SELFIE_PATH);
+      expect(fs.readdirSync).toHaveBeenCalledTimes(1);
+      expect(fs.readdirSync).toHaveBeenCalledWith(USER_SELFIE_PATH);
 
-      expect(response.body.links).toEqual(expect.arrayContaining(mockFiles));
-
-      fs.readdir.mockRestore();
+      expect(response.body.links.length).toBe(3);
     });
   });
 });

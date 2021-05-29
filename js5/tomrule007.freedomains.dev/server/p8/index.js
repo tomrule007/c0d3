@@ -1,9 +1,25 @@
 const router = require('express').Router();
-const fs = require('fs').promises;
+const fs = require('fs');
 const md5 = require('md5');
 const path = require('path');
 
 const USER_SELFIE_PATH = './public/p8/selfie/';
+const USER_SELFIE_URL = '/p8/selfie/';
+
+// Create directory if it doesn't exist
+fs.mkdirSync(USER_SELFIE_PATH, { recursive: true });
+
+// Load and sort selfies by date
+const sortedSelfies = new Set(
+  fs
+    .readdirSync(USER_SELFIE_PATH)
+    .map((file) => ({
+      file,
+      time: fs.statSync(USER_SELFIE_PATH + file).mtime.getTime(),
+    }))
+    .sort((a, b) => a.time - b.time)
+    .map(({ file }) => USER_SELFIE_URL + file)
+);
 
 router.post('/api/selfie', async (req, res) => {
   const { selfie } = req.body;
@@ -14,21 +30,20 @@ router.post('/api/selfie', async (req, res) => {
 
   const uniqueName = md5(selfie).concat('.png');
 
-  await fs.writeFile(
+  await fs.promises.writeFile(
     USER_SELFIE_PATH + uniqueName,
     selfie.split(',').pop(), //Insures the user didn't include meta data
     'base64'
   );
+  const selfieUrl = USER_SELFIE_URL + uniqueName;
+
+  sortedSelfies.add(selfieUrl);
 
   res.status(200).json({ link: '/p8/selfie/' + uniqueName });
 });
 
 router.get('/api/selfie', async (req, res) => {
-  const selfies = await fs.readdir(USER_SELFIE_PATH);
-  const prefix = '/p8/selfie/';
-  const selfiesWithPrefix = selfies.map((name) => prefix + name);
-  console.log(selfiesWithPrefix);
-  res.status(200).json({ links: selfiesWithPrefix });
+  res.status(200).json({ links: [...sortedSelfies] });
 });
 
 // ERROR HANDLER
