@@ -6,31 +6,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Selfie Queen</title>
     <style>
-      body {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+      .ratio-container {
+        position: relative;
+        width: min(100%, 640px);
+        height: 0;
+        padding-top: 75%;
       }
-      .photo-button {
+      .snapshot,
+      .video-display {
+        width: min(100%, 640px);
+        height: 100%;
+      }
+      .snapshot-button {
         margin: 0.5em;
         padding: 0.5em 1em;
-        font-size: xx-large;
+        font-size: 30px;
         border-radius: 1em;
+        flex-shrink: 0;
+      }
+      .photo-booth {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+      }
+      .selfie-gallery {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow-y: auto;
+      }
+      /* .photo-booth {
+        max-height: 90vh;
+      } */
+
+      .link {
+        color: white;
+        position: absolute;
+        left: 1em;
+        bottom: 1em;
+        margin: 0 auto;
+      }
+      .hidden {
+        display: none;
       }
     </style>
   </head>
 
   <body>
-    <video class="video-display" width="640px" height="480px"></video>
-    <button class="photo-button" alt="Take Photo" disabled="true">📷</button>
-    <canvas class="snapshot" width="640px" height="480px"></canvas>
-    <div class="link-container"></div>
+    <div class="photo-booth">
+      <video class="video-display" width="640px" height="480px"></video>
 
+      <button class="snapshot-button" alt="Take snapshot" disabled="true">
+        📷
+      </button>
+
+      <div class="snapshot-container hidden">
+        <canvas class="snapshot" width="640px" height="480px"></canvas>
+        <a class="link"></a>
+      </div>
+    </div>
+
+    <div class="selfie-gallery"></div>
     <script>
       const $video = document.querySelector('.video-display');
-      const $photoButton = document.querySelector('.photo-button');
+      const $photoButton = document.querySelector('.snapshot-button');
       const $snapshot = document.querySelector('.snapshot');
-      const $linkContainer = document.querySelector('.link-container');
+      const $snapshotContainer = document.querySelector('.snapshot-container');
+      const $selfieGallery = document.querySelector('.selfie-gallery');
+      const $link = document.querySelector('.link');
       const context = $snapshot.getContext('2d');
 
       navigator.mediaDevices
@@ -49,8 +95,9 @@
 
       $photoButton.addEventListener('click', (e) => {
         context.drawImage($video, 0, 0, 640, 480);
+        $snapshotContainer.classList.remove('hidden');
         const imageData = $snapshot.toDataURL().split(',')[1]; // remove meta data
-        fetch('api/selfie', {
+        fetch('/p8/api/selfie', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ selfie: imageData }),
@@ -59,19 +106,43 @@
           .then((body) => {
             if (body.error) throw body.error;
 
-            const $link = document.createElement('a');
             $link.innerText = body.link;
             $link.href = body.link;
-            $linkContainer.append($link, document.createElement('br'));
           })
           .catch((err) => {
             console.log(err);
-            $linkContainer.append(
-              `Error: ${err} `,
-              document.createElement('br')
-            );
           });
       });
+
+      const photoRenderCount = 0;
+      const renderNewPhotos = (links) => {
+        const selfies = links.slice(photoRenderCount).map((url) => {
+          const $selfie = document.createElement('img');
+          $selfie.src = url;
+          return $selfie;
+        });
+        $selfieGallery.append(...selfies);
+      };
+
+      const getAndRenderPhotos = () => {
+        fetch('/p8/api/selfie')
+          .then((r) => r.json())
+          .then((body) => {
+            if (body.error) throw body.error;
+            if (!body.links) throw Error('NO LINKS');
+            renderNewPhotos(body.links);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      };
+
+      getAndRenderPhotos();
+
+      //Poll server for new images every minute
+      setInterval(() => {
+        getAndRenderPhotos;
+      }, 1000 * 60);
     </script>
   </body>
 </html>

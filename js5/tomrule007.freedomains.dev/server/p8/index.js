@@ -25,8 +25,10 @@ router.post('/api/selfie', async (req, res) => {
 
 router.get('/api/selfie', async (req, res) => {
   const selfies = await fs.readdir(USER_SELFIE_PATH);
-  console.log(selfies);
-  res.status(200).json({ links: selfies });
+  const prefix = '/p8/selfie/';
+  const selfiesWithPrefix = selfies.map((name) => prefix + name);
+  console.log(selfiesWithPrefix);
+  res.status(200).json({ links: selfiesWithPrefix });
 });
 
 // ERROR HANDLER
