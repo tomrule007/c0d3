@@ -30,7 +30,7 @@ router.use(cookieParser());
 router.post('/api/user', (req, res) => {
   const { username } = req.body;
   if (!username)
-    res.status(400).json({
+    return res.status(400).json({
       error: { message: 'Must provide alphanumeric username' },
     });
 
