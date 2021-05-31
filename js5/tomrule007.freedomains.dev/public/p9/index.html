@@ -59,7 +59,7 @@
         justify-content: center;
         margin: 0;
       }
-      .selfie-gallery {
+      .meme-gallery {
         width: 100%;
         display: flex;
         flex-wrap: wrap;
@@ -106,7 +106,7 @@
 
   <body>
     <h1>Meme Chat</h1>
-    <div class="login-container">
+    <div class="login-container hidden">
       <h2>Login to share a meme!</h2>
       <label>Username: <input class="username-input" type="text" /> </label>
       <div class="login-error"></div>
@@ -139,8 +139,9 @@
         <button class="share-button button" alt="Share snapshot">Share</button>
       </div>
     </div>
+    <div class="app"></div>
     <h2>User Memes</h2>
-    <div class="selfie-gallery"></div>
+    <div class="meme-gallery"></div>
     <script>
       // DOM refs
       const $loginContainer = document.querySelector('.login-container');
@@ -165,7 +166,7 @@
       const $memeInput = document.querySelector('.meme-input');
       const $shareButton = document.querySelector('.share-button');
 
-      const $selfieGallery = document.querySelector('.selfie-gallery');
+      const $memeGallery = document.querySelector('.meme-gallery');
       const context = $snapshot.getContext('2d');
 
       // Webcam Setup
@@ -184,37 +185,85 @@
         });
 
       // View Renders
-      const renderSelfie = (url) => {
+
+      const createMemeNode = ({ url, username }) => {
         //TODO pass in user name with url
-        const username = 'Tomrule007';
-        const $selfieContainer = document.createElement('div');
-        $selfieContainer.innerHTML = `
-        <img class="selfie" src= "${url}"/>
-        <h2>${username}</h2>
-          `;
-        $selfieContainer.classList.add('meme-container');
+        const $memeContainer = document.createElement('div');
+        const $meme = document.createElement('img');
+        $meme.src = url;
+        const $username = document.createElement('h2');
+        $username.innerText = username;
 
-        renderedUrls.add(url);
+        $memeContainer.classList.add('meme-container');
+        $memeContainer.append($meme, $username);
 
-        return $selfieContainer;
+        const getSrc = () => $meme.src;
+        const setSrc = (url) => ($meme.src = url);
+
+        return {
+          el: $memeContainer,
+          get src() {
+            return $meme.src;
+          },
+          set src(url) {
+            $meme.src = url;
+          },
+        };
       };
 
-      const renderedUrls = new Set();
-      const renderNewPhotos = (urls) => {
-        const newUrls = urls.filter((url) => !renderedUrls.has(url));
-
-        const selfies = newUrls.map(renderSelfie);
-
-        $selfieGallery.prepend(...selfies.reverse());
+      // check for user
+      const showLogin = (error) => {
+        $loginContainer.classList.remove('hidden');
       };
 
-      const fetchAndRenderSelfies = () => {
-        fetch('/p8/api/selfie')
+      const showPhotoBooth = (username) => {
+        $usernameDisplay.innerText = username;
+        $usernameContainer.classList.remove('hidden');
+        $photoBooth.classList.remove('hidden');
+      };
+
+      fetch('/p9/api/user', { method: 'GET', credentials: 'same-origin' })
+        .then((r) => r.json())
+        .then((body) => {
+          if (body.error) throw body.error;
+          console.log();
+          showPhotoBooth(body.username);
+        })
+        .catch((err) => {
+          //TODO: add some error handling
+          showLogin();
+        });
+
+      const renderedMemes = {};
+
+      const fetchAndRenderMemes = () => {
+        fetch('/p9/api/meme', { credentials: 'same-origin' })
           .then((r) => r.json())
           .then((body) => {
             if (body.error) throw body.error;
-            if (!body.links) throw Error('NO LINKS');
-            renderNewPhotos(body.links);
+            console.log(body);
+            if (!body.memes) throw Error('NO MEMES');
+            // Render new memes
+
+            const newMemes = [];
+            body.memes.forEach((meme) => {
+              const { username, url } = meme;
+
+              if (renderedMemes[username]) {
+                //Already rendered just update src if needed
+                if (renderedMemes[username].src !== url) {
+                  renderedMemes[username].src = url;
+                  newMemes.push(renderedMemes[username].el);
+                }
+                // Do nothing if meme didnt change
+              } else {
+                const node = createMemeNode(meme);
+                renderedMemes[username] = node;
+                newMemes.push(node.el);
+              }
+            });
+
+            $memeGallery.prepend(...newMemes.reverse());
           })
           .catch((err) => {
             console.log(err);
@@ -222,7 +271,12 @@
       };
 
       // Initial gallery fetch
-      fetchAndRenderSelfies();
+      fetchAndRenderMemes();
+      //Poll server for new images 30seconds
+
+      setInterval(() => {
+        fetchAndRenderMemes();
+      }, 1000 * 30);
 
       // Event Listeners & Polling
       $loginButton.addEventListener('click', (e) => {
@@ -238,7 +292,7 @@
           .then((r) => r.json())
           .then((body) => {
             if (body.error) throw body.error;
-
+            localStorage.setItem('username', username);
             $usernameDisplay.innerText = username;
             $loginContainer.classList.add('hidden');
             $usernameContainer.classList.remove('hidden');
@@ -270,8 +324,9 @@
       $shareButton.addEventListener('click', () => {
         const imageData = $snapshot.toDataURL().split(',')[1]; // remove meta data
         const meme = $memeInput.value;
-        fetch('/p8/api/selfie', {
+        fetch('/p9/api/meme', {
           method: 'POST',
+          credentials: 'same-origin',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ selfie: imageData, meme }),
         })
@@ -279,17 +334,12 @@
           .then((body) => {
             if (body.error) throw body.error;
 
-            fetchAndRenderSelfies();
+            fetchAndRenderMemes();
           })
           .catch((err) => {
             console.log(err);
           });
       });
-
-      //Poll server for new images 30seconds
-      setInterval(() => {
-        fetchAndRenderSelfies();
-      }, 1000 * 30);
     </script>
   </body>
 </html>
