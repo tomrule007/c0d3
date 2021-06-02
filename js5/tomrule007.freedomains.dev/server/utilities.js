@@ -1,3 +1,13 @@
+const promisify = (fun) => {
+  return (...args) => {
+    return new Promise((res, rej) => {
+      fun(...args, (err, result) => {
+        err ? rej(err) : res(result);
+      });
+    });
+  };
+};
+
 const compose =
   (...fns) =>
   (x) =>
@@ -115,6 +125,7 @@ class LRUCache {
 }
 
 module.exports = {
+  promisify,
   compose,
   split,
   last,

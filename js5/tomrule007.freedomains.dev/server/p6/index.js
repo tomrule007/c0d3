@@ -3,49 +3,17 @@ const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const { promisify } = require('../utilities');
+
 // ! Would be environment variable in real app
 const SECRET_JWT_KEY = 'moreLikePublicKey';
 
-const createJwtToken = (user) =>
-  new Promise((resolve, reject) => {
-    jwt.sign(user, SECRET_JWT_KEY, { algorithm: 'HS256' }, (err, token) =>
-      err ? reject(err) : resolve(token)
-    );
-  });
+const createJwtToken = promisify(jwt.sign);
+const verifyJwtToken = promisify(jwt.verify);
+const encryptPassword = promisify(bcrypt.hash);
+const verifyPassword = promisify(bcrypt.compare);
 
-const verifyJwtToken = (token) =>
-  new Promise((resolve, reject) => {
-    jwt.verify(token, SECRET_JWT_KEY, (err, decoded) =>
-      err ? reject(err) : resolve(decoded)
-    );
-  });
-
-const encryptPassword = (password) =>
-  new Promise((resolve, reject) => {
-    const saltRounds = 10;
-    bcrypt.hash(password, saltRounds, (err, hash) =>
-      err ? reject(err) : resolve(hash)
-    );
-  });
-
-const verifyPassword = (password, hash) =>
-  new Promise((resolve, reject) => {
-    bcrypt.compare(password, hash, (err, result) =>
-      err ? reject(err) : resolve(result)
-    );
-  });
-
-// Mock User for testing
-const VALID_MOCK_USER_PASSWORD = 'superSecure';
-const VALID_MOCK_USER = {
-  name: 'tommy',
-  username: 'testUser',
-  email: 'test@mock.com',
-  id: 'c60c7e46-5719-41df-bc35-405c0e678236',
-  hash: '$2b$10$La1oIdvnCAUfHPLkc0onqe09pfZlhDVi8LRw8eMPWcGtvpQLIV7je',
-};
-
-const users = process.env.NODE_ENV === 'test' ? [VALID_MOCK_USER] : [];
+const users = require('./lib/users').getUsers();
 
 const isUniqueUsername = (username) =>
   !users.some((user) => user.username === username);
@@ -61,7 +29,6 @@ const getUserByKeyValue = (keyValue) =>
 
 router.post('/api/users', async (req, res) => {
   const { password, username, email, ...extras } = req.body;
-
   if (!password || password.length <= 5)
     return res.status(400).json({
       error: {
@@ -101,13 +68,14 @@ router.post('/api/users', async (req, res) => {
       },
     });
   // Create user
-  await encryptPassword(password)
+  const saltRounds = 10;
+  await encryptPassword(password, saltRounds)
     .then((hash) => {
       const newUser = { email, username, id: uuidv4(), ...extras };
       users.push({ ...newUser, hash });
-      return createJwtToken(newUser).then((jwt) =>
-        res.status(200).json({ ...newUser, jwt })
-      );
+      return createJwtToken(newUser, SECRET_JWT_KEY, {
+        algorithm: 'HS256',
+      }).then((jwt) => res.status(200).json({ ...newUser, jwt }));
     })
     .catch((err) => {
       console.log('encryptPassword', err);
@@ -135,9 +103,11 @@ router.post('/api/sessions', async (req, res) => {
     .then((isValidPassword) => {
       if (!isValidPassword)
         return res.status(400).json({ error: { message: 'User not found' } });
-      return createJwtToken(user).then((jwt) => {
-        return res.status(200).json({ ...user, jwt });
-      });
+      return createJwtToken(user, SECRET_JWT_KEY, { algorithm: 'HS256' }).then(
+        (jwt) => {
+          return res.status(200).json({ ...user, jwt });
+        }
+      );
     })
     .catch((err) => {
       console.log('encryptPassword', err);
@@ -151,7 +121,7 @@ router.get('/api/sessions', async (req, res) => {
     return res.status(400).json({ error: { message: 'Not logged in' } });
 
   const expireTime = Math.floor(Date.now() / 1000) - 60 * 60; // Token expires after 1hr
-  await verifyJwtToken(jwt)
+  await verifyJwtToken(jwt, SECRET_JWT_KEY)
     .then((decoded) => {
       const { iat, ...payload } = decoded || {};
       payload && iat > expireTime
@@ -165,5 +135,3 @@ router.get('/api/sessions', async (req, res) => {
 });
 
 module.exports = router;
-module.exports.VALID_MOCK_USER = VALID_MOCK_USER;
-module.exports.VALID_MOCK_USER_PASSWORD = VALID_MOCK_USER_PASSWORD;

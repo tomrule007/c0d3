@@ -1,11 +1,24 @@
 const request = require('supertest');
 const app = require('../app');
-const { VALID_MOCK_USER, VALID_MOCK_USER_PASSWORD } = require('./index');
+
+const VALID_MOCK_USER_PASSWORD = 'superSecure';
+const VALID_MOCK_USER = {
+  name: 'tommy',
+  username: 'testUser',
+  email: 'test@mock.com',
+  id: 'c60c7e46-5719-41df-bc35-405c0e678236',
+  hash: '$2b$10$La1oIdvnCAUfHPLkc0onqe09pfZlhDVi8LRw8eMPWcGtvpQLIV7je',
+};
+
+jest.mock('./lib/users');
+require('./lib/users').getUsers.mockReturnValue([VALID_MOCK_USER]);
+
 describe('js5/p6', () => {
   describe('POST p6/api/users', () => {
     describe('password field cannot be blank and must be >5 letters', () => {
       it(' Missing requirements -> status 400', async () => {
         await request(app).post('/p6/api/users').send({}).expect(400);
+
         await request(app)
           .post('/p6/api/users')
           .send({ password: 'small' })
