@@ -1,8 +1,28 @@
 const app = require('./server/app.js');
 
 const port = process.env.PORT || 8123;
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+
+const { ApolloServer } = require('apollo-server-express');
+const { typeDefs, resolvers } = require('./schema');
+
+async function startApolloServer(app) {
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+  });
+  await server.start();
+
+  server.applyMiddleware({ app });
+
+  console.log(`🚀 GraphQL endpoint: ${server.graphqlPath}`);
+
+  return app;
+}
+
+startApolloServer(app).then((app) => {
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
 });
 
 if (process.env.NODE_ENV === 'development') {
