@@ -1,4 +1,5 @@
 const app = require('./server/app.js');
+const { PokemonAPI } = require('./pokemon-api');
 
 const port = process.env.PORT || 8123;
 
@@ -9,6 +10,9 @@ async function startApolloServer(app) {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
+    dataSources: () => ({
+      pokemonAPI: new PokemonAPI(),
+    }),
   });
   await server.start();
 

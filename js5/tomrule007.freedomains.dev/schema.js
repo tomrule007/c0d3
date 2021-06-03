@@ -3,27 +3,7 @@ const fetch = require('node-fetch');
 
 const typeDefs = gql`
   type Lesson {
-    id: Int
-    description: String
-    docUrl: String
-    githubUrl: String
-    videoUrl: String
-    order: Int
-    title: String
-    createdAt: String
-    updatedAt: String
-    chatUrl: String
-    challenges: [Challenge]
-  }
-
-  type Challenge {
-    id: Int
-    description: String
-    title: String
-    order: Int
-    createdAt: String
-    updatedAt: String
-    lessonId: Int
+    title: String!
   }
 
   type BasicPokemon {
@@ -44,8 +24,16 @@ const typeDefs = gql`
 
 const resolvers = {
   Query: {
-    lessons: () =>
-      fetch('https://www.c0d3.com/api/lessons').then((r) => r.json()),
+    lessons: () => {
+      console.log('FETCHING THE LESSONS');
+      return fetch('https://www.c0d3.com/api/lessons').then((r) => r.json());
+    },
+    search: async (_, { str }, { dataSources }) => {
+      const allBasicPokemon = await dataSources.pokemonAPI.getAllBasicPokemon();
+      return allBasicPokemon.filter((pokemon) => pokemon.name.includes(str));
+    },
+    getPokemon: (_, { str }, { dataSources }) =>
+      dataSources.pokemonAPI.getPokemon(str),
   },
 };
 
