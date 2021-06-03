@@ -28,13 +28,16 @@ startApolloServer(app).then((app) => {
 if (process.env.NODE_ENV === 'development') {
   // Browsersync proxy
   const bs = require('browser-sync').create();
-  bs.init({
-    open: false,
-    port: process.env.PROXY_PORT || 3000,
-    proxy: `http://localhost:${port}`,
-    notify: false,
-    ws: true,
-  });
+  bs.init(
+    {
+      open: false,
+      port: process.env.PROXY_PORT || 3000,
+      proxy: `http://localhost:${port}`,
+      notify: false,
+      ws: true,
+    },
+    () => bs.reload() // Force refresh on first boot
+  );
 
   // File Watcher
   const chokidar = require('chokidar');
