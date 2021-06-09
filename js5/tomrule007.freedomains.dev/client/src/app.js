@@ -1,4 +1,5 @@
 import Kanban from './Kanban';
+import PokemonSearch from './pages/PokemonSearch';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Stars from './Stars';
@@ -9,8 +10,13 @@ ReactDOM.render(
     <Stars />
   ) : pathname === '/react/kanban' ? (
     <Kanban />
+  ) : pathname === '/react/pokemonsearch' ? (
+    <PokemonSearch />
   ) : (
-    <p> Unknown route! Try '/js6/p3/star' or '/js6/p3/kanban' </p>
+    <p>
+      Unknown route! Try '/react/star' or '/react/kanban' or
+      '/react/pokemonsearch'
+    </p>
   ),
   document.getElementById('root')
 );
