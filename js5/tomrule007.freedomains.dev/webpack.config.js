@@ -1,9 +1,13 @@
 const path = require('path');
 
 module.exports = {
-  entry: './client/src/app.js', // The first file to look into. Move your JavaScript here!
-  mode: 'production',
+  entry: {
+    app: './client/src/app.js',
+    pokemon: './client/src/pokemon/app.js',
+  }, // The first file to look into. Move your JavaScript here!
+  mode: 'development',
   output: {
+    filename: '[name].js',
     path: path.resolve(__dirname, 'public/dist'), // We will put the compiled file into public/dist
   },
   module: {
@@ -16,6 +20,10 @@ module.exports = {
         options: {
           presets: ['@babel/preset-react'],
         },
+      },
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
       },
     ],
   },
