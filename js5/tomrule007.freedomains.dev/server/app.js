@@ -42,6 +42,10 @@ app.get('/js6/p3/*', (req, res, next) => {
   res.sendFile(path.join(__dirname, '../public/js6/p3/index.html'));
 });
 
+app.get('/js6/p4/*', (req, res, next) => {
+  res.sendFile(path.join(__dirname, '../public/js6/p4/index.html'));
+});
+
 app.get('/react/*', (req, res, next) => {
   res.sendFile(path.join(__dirname, '../public/react/index.html'));
 });
