@@ -55,7 +55,6 @@ const Stars = ({ onSetGiven, count = 5, initialGiven }) => {
         onMouseEnter={() => dispatch(resetGiven())}
         onClick={() => {
           dispatch(setGiven());
-          W;
           onSetGiven(Number(state.lastHover));
         }}
       >
