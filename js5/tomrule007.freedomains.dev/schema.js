@@ -3,9 +3,9 @@ const fetch = require('node-fetch');
 
 const typeDefs = gql`
   type User {
-    name: String
-    image: String
-    lessons: [Lesson]
+    name: String!
+    image: String!
+    lessons: [Lesson!]!
   }
 
   type Lesson @cacheControl(maxAge: 3600) {
@@ -22,8 +22,8 @@ const typeDefs = gql`
   }
 
   type Query {
-    lessons: [Lesson]
-    search(str: String!): [BasicPokemon]
+    lessons: [Lesson!]!
+    search(str: String!): [BasicPokemon!]!
     getPokemon(str: String!): Pokemon
     user: User
   }
@@ -49,6 +49,7 @@ const resolvers = {
   Mutation: {
     login: async (_, { pokemon }, { req, dataSources }) => {
       const nameAndImage = await dataSources.pokemonAPI.getPokemon(pokemon);
+      if (!nameAndImage) throw new Error(`Failed to get pokemon: ${pokemon}`);
       req.session.user = { ...nameAndImage, lessons: [] };
       return req.session.user;
     },
