@@ -10,8 +10,7 @@ import { sendQuery } from './utilities';
 
 const getUser = () =>
   sendQuery(`{
-    user {name, image, lessons {title}},
-    lessons {title}
+    user {name},
   }`);
 
 function Pokemon() {
@@ -20,7 +19,8 @@ function Pokemon() {
 
   useEffect(() => {
     getUser().then((result) => {
-      if (result?.login?.name) setLoggedIn(true);
+      console.log(result);
+      if (result?.user) setLoggedIn(true);
 
       setLoading(false);
     });
