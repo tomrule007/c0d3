@@ -1,10 +1,10 @@
 import React from 'react';
-// Action creator's
 
+// Action creator's
 const setGiven = () => ({ type: 'SET_GIVEN' });
 const resetGiven = () => ({ type: 'RESET_GIVEN' });
-const updateStarCount = (index) => ({
-  type: 'UPDATE_STAR_COUNT',
+const updateLastHover = (index) => ({
+  type: 'UPDATE_LAST_HOVER',
   payload: { index },
 });
 
@@ -15,8 +15,8 @@ const starsReducer = (state, action) => {
     case 'SET_GIVEN':
       return {
         ...state,
+        stars: state.lastHover,
         given: true,
-        text: `You have given ${state.lastHover} Stars!`,
       };
       break;
 
@@ -24,15 +24,11 @@ const starsReducer = (state, action) => {
       return { ...state, given: false };
       break;
 
-    case 'UPDATE_STAR_COUNT':
-      return state.given
-        ? state
-        : {
-            ...state,
-            stars: state.stars.map((_, i) => i <= action.payload.index),
-            lastHover: action.payload.index + 1,
-            text: `You are giving ${action.payload.index + 1} Stars!`,
-          };
+    case 'UPDATE_LAST_HOVER':
+      return {
+        ...state,
+        lastHover: action.payload.index + 1,
+      };
       break;
 
     default:
@@ -45,15 +41,11 @@ const Star = ({ lit, onMouseEnter }) => (
   <i className={`${lit ? 'fas' : 'far'} fa-star`} onMouseEnter={onMouseEnter} />
 );
 
-const Stars = ({ onSetGiven, count = 5, initialGiven = 1 }) => {
-  React.useEffect(() => {
-    document.title = 'Star';
-  });
+const Stars = ({ onSetGiven, count = 5, initialGiven }) => {
   const [state, dispatch] = React.useReducer(starsReducer, {
-    given: false,
-    lastHover: 1,
-    text: `You are giving ${initialGiven} Stars!`,
-    stars: Array.from({ length: count }, (_, i) => i < initialGiven),
+    given: !!initialGiven,
+    lastHover: 0,
+    stars: initialGiven || 0,
   });
 
   return (
@@ -67,15 +59,19 @@ const Stars = ({ onSetGiven, count = 5, initialGiven = 1 }) => {
           onSetGiven(Number(state.lastHover));
         }}
       >
-        {state.stars.map((lit, i) => (
+        {Array.from({ length: count }, (_, i) => (
           <Star
-            lit={lit}
+            lit={i < (state.given ? state.stars : state.lastHover)}
             key={i}
-            onMouseEnter={() => dispatch(updateStarCount(i))}
+            onMouseEnter={() => dispatch(updateLastHover(i))}
           />
         ))}
       </div>
-      <div className="starsText">{state.text}</div>
+      <div className="starsText">
+        {`You are ${
+          state.given ? `given ${state.stars}` : `giving ${state.lastHover}`
+        } Stars!`}
+      </div>
     </React.Fragment>
   );
 };
