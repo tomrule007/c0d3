@@ -1,20 +1,25 @@
 import React, { useEffect, useState } from 'react';
 
+import Stars from '../components/Stars';
 import { sendQuery } from '../utilities';
 
 const getUserInfo = () =>
   sendQuery(`{
-    user {name, image, lessons {title}},
+    user {name, image, lessons {title}, ratings {title, rating} },
     lessons {title}
   }`);
 
+const toRatingsMap = (ratings) =>
+  Object.fromEntries(ratings.map(({ title, rating }) => [title, rating]));
+
 const PokemonLoggedInPage = () => {
   const [{ user, lessons }, setUserInfo] = useState({});
+  const [ratingsMap, setRatingsMap] = useState({});
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     getUserInfo().then((results) => {
       setUserInfo(results);
+      setRatingsMap(toRatingsMap(results.user.ratings));
       setLoading(false);
     });
   }, []);
@@ -37,6 +42,15 @@ const PokemonLoggedInPage = () => {
       .then(setUserInfo);
   };
 
+  const handleRate = ({ title, rating }) => {
+    sendQuery(
+      `mutation { rate(title: "${title}", rating: ${rating}) {ratings {title rating}}}`
+    )
+      .then((results) => toRatingsMap(results.rate.ratings))
+      .then(setRatingsMap);
+  };
+
+  console.log(user);
   return (
     !loading && (
       <div>
@@ -49,9 +63,15 @@ const PokemonLoggedInPage = () => {
             <h2>Enrolled</h2>
             <p>Click to unenroll</p>
             {user.lessons.map(({ title }, i) => (
-              <h4 key={i} onClick={() => handleUnenroll(title)}>
-                {title}
-              </h4>
+              <>
+                <h4 key={i} onClick={() => handleUnenroll(title)}>
+                  {title}
+                </h4>
+                <Stars
+                  initialGiven={ratingsMap[title] || 0}
+                  onSetGiven={(rating) => handleRate({ title, rating })}
+                />
+              </>
             ))}
           </div>
         )}

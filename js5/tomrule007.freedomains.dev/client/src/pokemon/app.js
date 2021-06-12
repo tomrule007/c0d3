@@ -19,7 +19,6 @@ function Pokemon() {
 
   useEffect(() => {
     getUser().then((result) => {
-      console.log(result);
       if (result?.user) setLoggedIn(true);
 
       setLoading(false);
