@@ -42,15 +42,14 @@ const PokemonLoggedInPage = () => {
       .then(setUserInfo);
   };
 
-  const handleRate = ({ title, rating }) => {
+  const handleRateLesson = ({ title, rating }) => {
     sendQuery(
-      `mutation { rate(title: "${title}", rating: ${rating}) {ratings {title rating}}}`
+      `mutation { rateLesson(title: "${title}", rating: ${rating}) {ratings {title rating}}}`
     )
-      .then((results) => toRatingsMap(results.rate.ratings))
+      .then((results) => toRatingsMap(results.rateLesson.ratings))
       .then(setRatingsMap);
   };
 
-  console.log(user);
   return (
     !loading && (
       <div>
@@ -69,7 +68,7 @@ const PokemonLoggedInPage = () => {
                 </h4>
                 <Stars
                   initialGiven={ratingsMap[title] || 0}
-                  onSetGiven={(rating) => handleRate({ title, rating })}
+                  onSetGiven={(rating) => handleRateLesson({ title, rating })}
                 />
               </>
             ))}

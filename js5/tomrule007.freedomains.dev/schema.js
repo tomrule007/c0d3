@@ -38,52 +38,11 @@ const typeDefs = gql`
     login(pokemon: String!): User
     enroll(title: String!): User
     unenroll(title: String!): User
-    rate(title: String!, rating: Int!): User
+    rateLesson(title: String!, rating: Int!): User
   }
 `;
 
-const fakeReviews = [
-  {
-    title: 'Foundations of JavaScript',
-    rating: 4,
-  },
-  {
-    title: 'Variables & Functions',
-    rating: 4,
-  },
-  {
-    title: 'Arrays',
-    rating: 4,
-  },
-  {
-    title: 'Objects',
-    rating: 4,
-  },
-  {
-    title: 'Front End Engineering',
-    rating: 4,
-  },
-  {
-    title: 'End To End',
-    rating: 4,
-  },
-  {
-    title: 'React, GraphQL, SocketIO',
-    rating: 4,
-  },
-  {
-    title: 'JavaScript Algorithms',
-    rating: 4,
-  },
-  {
-    title: 'Trees',
-    rating: 4,
-  },
-  {
-    title: 'General Algorithms',
-    rating: 4,
-  },
-];
+const lessonRatingsByUser = {};
 
 const resolvers = {
   Query: {
@@ -103,7 +62,7 @@ const resolvers = {
       req.session.user = {
         ...nameAndImage,
         lessons: [],
-        ratings: fakeReviews,
+        ratings: lessonRatingsByUser[nameAndImage.name] || [],
       };
       return req.session.user;
     },
@@ -128,7 +87,7 @@ const resolvers = {
 
       return user;
     },
-    rate: async (_, { title, rating }, { req, dataSources }) => {
+    rateLesson: async (_, { title, rating }, { req, dataSources }) => {
       // helper
       const hasTitle = (lesson) => lesson.title === title;
 
@@ -152,6 +111,9 @@ const resolvers = {
       if (ratingIndex > -1) {
         user.ratings[ratingIndex].rating = rating;
       } else user.ratings.push({ title, rating });
+
+      // persist ratings by pokemon in memory
+      lessonRatingsByUser[user.name] = user.ratings;
 
       return user;
     },
