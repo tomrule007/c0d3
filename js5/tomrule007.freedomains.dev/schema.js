@@ -152,7 +152,7 @@ const resolvers = {
       if (ratingIndex > -1) {
         user.ratings[ratingIndex].rating = rating;
       } else user.ratings.push({ title, rating });
-      console.log(user);
+
       return user;
     },
     unenroll: async (_, { title }, { req, dataSources }) => {
