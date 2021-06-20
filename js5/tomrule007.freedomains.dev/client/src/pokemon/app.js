@@ -14,6 +14,15 @@ import PokemonLoginPage from './pages/PokemonLoginPage';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+// TODO: setup cache id fields
+const cacheOptions = {
+  typePolicies: {
+    User: {
+      keyFields: ['name'],
+    },
+  },
+};
+
 const client = new ApolloClient({
   uri:
     process.env.NODE_ENV === 'development'
