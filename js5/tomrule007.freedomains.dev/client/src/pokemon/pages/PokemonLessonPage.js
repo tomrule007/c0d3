@@ -31,6 +31,7 @@ const UNENROLL = gql`
 const RATE_LESSON = gql`
   mutation RateLesson($title: String!, $rating: Int!) {
     rateLesson(title: $title, rating: $rating) {
+      name
       ratings {
         title
         rating
@@ -63,33 +64,12 @@ const PokemonLoggedInPage = () => {
     loading: loading,
     error,
     data: { user, lessons } = {},
-    refetch,
   } = useQuery(GET_USER_INFO);
 
   //# TODO: remove refetch! switch to using returned mutation! { data }
-  const [enroll] = useMutation(ENROLL, {
-    update(cache, { data }) {
-      const mutatedLessons = data?.enroll.lessons;
-      const cachedLessons = cache.readQuery({
-        query: GET_USER_INFO,
-      });
-      if (cachedLessons && mutatedLessons) {
-        cache.writeQuery({
-          query: GET_USER_INFO,
-          data: {
-            user: {
-              ...cachedLessons?.user,
-              lessons: mutatedLessons,
-            },
-          },
-        });
-      }
-    },
-  });
+  const [enroll] = useMutation(ENROLL);
   const [unenroll] = useMutation(UNENROLL);
-  const [rateLesson] = useMutation(RATE_LESSON, {
-    onCompleted: refetch,
-  });
+  const [rateLesson] = useMutation(RATE_LESSON);
 
   const [unenrolledLessons, setUnenrolledLessons] = useState([]);
   const [ratingsMap, setRatingsMap] = useState({});

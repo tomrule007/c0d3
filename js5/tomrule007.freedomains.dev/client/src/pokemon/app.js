@@ -20,6 +20,9 @@ const cacheOptions = {
     User: {
       keyFields: ['name'],
     },
+    Lesson: {
+      keyFields: ['title'],
+    },
   },
 };
 
