@@ -28,7 +28,7 @@ const client = new ApolloClient({
     process.env.NODE_ENV === 'development'
       ? 'http://localhost:3000/graphql'
       : 'https://tomrule007.freedomains.dev/graphql',
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache(cacheOptions),
 });
 
 const GET_USER = gql`

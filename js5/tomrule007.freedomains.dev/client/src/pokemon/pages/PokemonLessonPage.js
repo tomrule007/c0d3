@@ -10,6 +10,9 @@ const ENROLL = gql`
   mutation Enroll($title: String!) {
     enroll(title: $title) {
       name
+      lessons {
+        title
+      }
     }
   }
 `;
@@ -18,6 +21,9 @@ const UNENROLL = gql`
   mutation Unenroll($title: String!) {
     unenroll(title: $title) {
       name
+      lessons {
+        title
+      }
     }
   }
 `;
@@ -62,11 +68,25 @@ const PokemonLoggedInPage = () => {
 
   //# TODO: remove refetch! switch to using returned mutation! { data }
   const [enroll] = useMutation(ENROLL, {
-    onCompleted: refetch,
+    update(cache, { data }) {
+      const mutatedLessons = data?.enroll.lessons;
+      const cachedLessons = cache.readQuery({
+        query: GET_USER_INFO,
+      });
+      if (cachedLessons && mutatedLessons) {
+        cache.writeQuery({
+          query: GET_USER_INFO,
+          data: {
+            user: {
+              ...cachedLessons?.user,
+              lessons: mutatedLessons,
+            },
+          },
+        });
+      }
+    },
   });
-  const [unenroll] = useMutation(UNENROLL, {
-    onCompleted: refetch,
-  });
+  const [unenroll] = useMutation(UNENROLL);
   const [rateLesson] = useMutation(RATE_LESSON, {
     onCompleted: refetch,
   });
