@@ -1,4 +1,6 @@
 const app = require('./server/app.js');
+const http = require('http');
+const socketIo = require('socket.io');
 const { PokemonAPI } = require('./pokemon-api');
 const { LessonsAPI } = require('./lessons-api');
 
@@ -28,8 +30,29 @@ async function startApolloServer(app) {
   return app;
 }
 
+const getApiAndEmit = (socket) => {
+  const response = new Date();
+  // Emitting a new message. Will be consumed by the client
+  socket.emit('FromAPI', response);
+};
+let interval;
 startApolloServer(app).then((app) => {
-  app.listen(port, () => {
+  const server = http.createServer(app);
+  console.log('APPOLLLOOOO GOOO', server);
+  const io = socketIo(server);
+  io.on('connection', (socket) => {
+    console.log('New client connected');
+    if (interval) {
+      clearInterval(interval);
+    }
+    interval = setInterval(() => getApiAndEmit(socket), 1000);
+
+    socket.on('disconnect', () => {
+      console.log('Client disconnected');
+      clearInterval(interval);
+    });
+  });
+  server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
 });
