@@ -1,6 +1,12 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 export default function ChatMessages({ messages }) {
+  const messageEndDiv = useRef(null);
+  useEffect(() => {
+    if (messageEndDiv.current)
+      messageEndDiv.current.scrollIntoView({ behavior: 'smooth' });
+  });
+
   return (
     <div
       style={{
@@ -15,6 +21,7 @@ export default function ChatMessages({ messages }) {
           <div style={{ marginTop: '3px' }}>{msg}</div>
         </div>
       ))}
+      <div ref={messageEndDiv}></div>
     </div>
   );
 }

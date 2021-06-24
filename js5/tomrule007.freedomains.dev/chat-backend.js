@@ -6,7 +6,7 @@ const socketIo = require('socket.io');
 // --- DATA STORAGE
 
 const users = {};
-const userNames = new Set('Server');
+const userNames = new Set(['Server']);
 
 // Message store (real app should not store all messages in memory and should have some way to persist msg history)
 const messages = [];
@@ -69,12 +69,11 @@ const handleMessageCommand = (socket, io, user, msg) => {
       );
 
     // valid name change, update name and notify users
-
     const oldName = user.name;
     userNames.delete(oldName);
     userNames.add(desiredName);
     user.name = desiredName;
-
+    console.log(user, users, userNames);
     socket.emit('userInfo', user);
     sendNewMsgFromServerUser(`Your username is now: "${user.name}"`);
     sendNewMsgFromServerUser(
@@ -94,7 +93,7 @@ const handleMessageCommand = (socket, io, user, msg) => {
 };
 
 const handleMessageReceived = (socket, io, msg) => {
-  // receive message -> if cmd send to commandHandler -> lookup sender name -> create timestamp
+  // receive message -> lookup sender name  -> if cmd send to commandHandler-> create timestamp
   //  -> Add it to message list -> broadcast new message
 
   const userId = socketIdToUserId[socket.id];
@@ -106,11 +105,11 @@ const handleMessageReceived = (socket, io, msg) => {
 
   if (msg[0] === '/') return handleMessageCommand(socket, io, user, msg);
 
-  console.log({ user, userId, socketId: socket.id });
   const msgNameTime = { sender: user.name, time: Date.now(), msg };
+
   messages.push(msgNameTime);
+
   io.emit('newMsg', msgNameTime);
-  console.log('newMsg: ', io.emit, msg, msgNameTime);
 };
 
 const handleMessageHistoryRequest = (socket, io) => {
@@ -136,6 +135,7 @@ const handleGetUserInfo = (socket, io, id) => {
     type: 'INITIAL_LOAD',
     payload: [...onlineUserNames],
   });
+
   socket.broadcast.emit('userListUpdate', {
     type: 'USER_SIGN_IN',
     payload: user.name,
@@ -143,7 +143,6 @@ const handleGetUserInfo = (socket, io, id) => {
 };
 
 const handleClientDisconnect = (socket) => {
-  console.log('Client disconnected');
   // Get user info
   const user = users[socketIdToUserId[socket.id]];
 

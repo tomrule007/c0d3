@@ -24,7 +24,6 @@ function Chatroom() {
   const [userInfo, setUserInfo] = useState({ name: 'null' });
   const [socketRef, setSocketRef] = useState(null);
 
-  console.log({ userList });
   // User Action Event Handlers
   const handleSendMsg = useCallback(
     (msg) => socketRef && socketRef.emit('newMsg', msg),
@@ -44,7 +43,6 @@ function Chatroom() {
     };
 
     const handleReceivedUserListUpdate = ({ type, payload }) => {
-      console.log('made it');
       switch (type) {
         case 'INITIAL_LOAD':
           setUserList(payload);
@@ -79,11 +77,6 @@ function Chatroom() {
     socket.on('userInfo', handleReceivedUserInfo);
     socket.on('newMsg', handleReceivedMsg);
     socket.on('userListUpdate', handleReceivedUserListUpdate);
-
-    // Debugging Event Listeners
-    socket.onAny((eventName, ...args) => {
-      console.log('All Events: ', eventName, args);
-    });
 
     // Request UserInfo, MessageHistory, UserList
     socket.emit('getUserInfo', USER_ID);

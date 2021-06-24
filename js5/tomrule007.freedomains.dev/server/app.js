@@ -47,7 +47,6 @@ app.get('/js6/p4/*', (req, res, next) => {
 });
 
 app.get('/chat', (req, res, next) => {
-  console.log('test');
   res.sendFile(path.join(__dirname, '../public/js6/p8/index.html'));
 });
 
