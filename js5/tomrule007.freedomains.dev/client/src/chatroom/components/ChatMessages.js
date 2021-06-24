@@ -9,9 +9,9 @@ export default function ChatMessages({ messages }) {
         margin: '10px',
       }}
     >
-      {messages.map(({ time, name, msg }, index) => (
+      {messages.map(({ time, sender, msg }, index) => (
         <div style={{ borderTop: '1px solid black' }} key={index}>
-          <b>{name}</b> <small>{new Date(time).toLocaleString()}</small>
+          <b>{sender}</b> <small>{new Date(time).toLocaleString()}</small>
           <div style={{ marginTop: '3px' }}>{msg}</div>
         </div>
       ))}

@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import ChatInput from './components/ChatInput';
 import ChatMessages from './components/ChatMessages';
 import ReactDOM from 'react-dom';
 import UserList from './components/UserList';
 import io from 'socket.io-client';
+import { v4 as uuidv4 } from 'uuid';
 
 const mockUsers = ['tom', 'tommy', 'thomas', 'tami'];
 const mockMessages = [
@@ -57,7 +58,7 @@ const mockMessages = [
 
 // The plan:
 // user connects
-//    Server sends saved session settings: user name(if first session assign random name)
+//   Server sends saved session settings: user name(if first session assign random name)
 //    server sends user list
 //    server sends msg history
 // on new msg -> append to chat
@@ -83,15 +84,51 @@ const mockMessages = [
 //    else
 //        server send msg to client: ___ is not already registered
 //
+
 function Chatroom() {
+  const [messages, setMessages] = useState(mockMessages);
   const [response, setResponse] = useState('');
+  const [userInfo, setUserInfo] = useState({ name: null });
+  const [socketRef, setSocketRef] = useState(null);
+  console.log({ socketRef });
+  const handleSendMsg = useCallback(
+    (msg) => {
+      if (socketRef) {
+        console.log('send this msg:', socketRef.id, msg);
+        socketRef.emit('newMsg', msg);
+      }
+    },
+    [socketRef]
+  );
+  console.log(messages)
+
+  const handleReceivedMsg = (msgNameTime) => 
+    setMessages(oldMsgs => [...oldMsgs, msgNameTime]);
+  
 
   useEffect(() => {
+    // Get or create user id
+    let userId = localStorage.getItem('chatUserId');
+    if (!userId) {
+      userId = uuidv4();
+      localStorage.setItem('chatUserId', userId);
+    }
+
     const socket = io();
-    socket.on('FromAPI', (data) => {
-      console.log(data);
-      setResponse(data);
+    socket.emit('getUserInfo', userId);
+    socket.emit('getMessageHistory');
+    socket.on('messageHistory', (data)=>{
+      setMessages(data);
+    })
+    socket.on('userInfo', (data) => {
+      console.log('userInfo', { data });
+      setUserInfo(data);
+      setSocketRef(socket);
     });
+    socket.onAny((eventName, ...args) => {
+      console.log('All Events: ', eventName, args);
+    });
+    socket.on('newMsg', handleReceivedMsg);
   }, []);
   return (
     <div style={{ display: 'flex' }}>
@@ -104,8 +141,8 @@ function Chatroom() {
           height: '100vh',
         }}
       >
-        <ChatMessages messages={mockMessages} />
-        <ChatInput />
+        <ChatMessages messages={messages} />
+        <ChatInput user={userInfo.name} onSend={handleSendMsg} />
       </div>
     </div>
   );
