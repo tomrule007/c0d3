@@ -1,9 +1,7 @@
 const app = require('./server/app.js');
-const http = require('http');
-const socketIo = require('socket.io');
 const { PokemonAPI } = require('./pokemon-api');
 const { LessonsAPI } = require('./lessons-api');
-
+const startSocketIoServer = require('./chat-backend');
 const port = process.env.PORT || 8123;
 
 const responseCachePlugin = require('apollo-server-plugin-response-cache');
@@ -37,22 +35,7 @@ const getApiAndEmit = (socket) => {
 };
 let interval;
 startApolloServer(app).then((app) => {
-  const server = http.createServer(app);
-  console.log('APPOLLLOOOO GOOO', server);
-  const io = socketIo(server);
-  io.on('connection', (socket) => {
-    console.log('New client connected');
-    if (interval) {
-      clearInterval(interval);
-    }
-    interval = setInterval(() => getApiAndEmit(socket), 1000);
-
-    socket.on('disconnect', () => {
-      console.log('Client disconnected');
-      clearInterval(interval);
-    });
-  });
-  server.listen(port, () => {
+  startSocketIoServer(app).listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
 });
