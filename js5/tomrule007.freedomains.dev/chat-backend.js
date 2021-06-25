@@ -72,6 +72,8 @@ const handleMessageCommand = (socket, io, user, msg) => {
     const oldName = user.name;
     userNames.delete(oldName);
     userNames.add(desiredName);
+    onlineUserNames.delete(oldName);
+    onlineUserNames.add(desiredName);
     user.name = desiredName;
     console.log(user, users, userNames);
     socket.emit('userInfo', user);
